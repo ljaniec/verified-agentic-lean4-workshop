@@ -1,0 +1,84 @@
+import Mathlib
+
+namespace VerifiedAgenticWorkshop.Scenarios.LifecycleResources
+
+/-- Primary lifecycle states used in the workshop model. -/
+inductive Mode where
+  | unconfigured
+  | inactive
+  | active
+  | finalized
+  deriving DecidableEq, Repr
+
+/--
+Application-level state around a managed ROS 2 node.
+
+The official lifecycle only constrains lifecycle states. The application must
+also keep hardware and file resources consistent with those states.
+-/
+structure State where
+  mode : Mode
+  sensorOpen : Bool
+  logOpen : Bool
+  actuatorEnabled : Bool
+  deriving DecidableEq, Repr
+
+inductive Event where
+  | configure
+  | activate
+  | deactivate
+  | cleanup
+  | shutdown
+  | recoverFromError
+  deriving DecidableEq, Repr
+
+/--
+The workshop invariant:
+
+* an active node owns its sensor and log resources;
+* an enabled actuator implies an active node;
+* unconfigured and finalized nodes own no runtime resource.
+-/
+def Safe (state : State) : Prop :=
+  (state.mode = .active →
+    state.sensorOpen = true ∧ state.logOpen = true) ∧
+  (state.actuatorEnabled = true → state.mode = .active) ∧
+  ((state.mode = .unconfigured ∨ state.mode = .finalized) →
+    state.sensorOpen = false ∧
+      state.logOpen = false ∧
+      state.actuatorEnabled = false)
+
+/-- Initial state of a freshly created managed node. -/
+def initial : State :=
+  ⟨.unconfigured, false, false, false⟩
+
+/-- A representative valid active state. -/
+def activeState : State :=
+  ⟨.active, true, true, true⟩
+
+/--
+A deliberately faulty transition function. `deactivate` changes only the
+lifecycle mode and forgets to disable the actuator and release resources.
+-/
+def buggyStep (state : State) (event : Event) : State :=
+  match state.mode, event with
+  | .unconfigured, .configure => ⟨.inactive, false, false, false⟩
+  | .inactive, .activate => ⟨.active, true, true, true⟩
+  | .active, .deactivate => { state with mode := .inactive }
+  | .inactive, .cleanup => initial
+  | _, .shutdown => ⟨.finalized, false, false, false⟩
+  | _, .recoverFromError => initial
+  | _, _ => state
+
+/-- Corrected transition function with explicit resource cleanup. -/
+def step (state : State) (event : Event) : State :=
+  match state.mode, event with
+  | .unconfigured, .configure => ⟨.inactive, false, false, false⟩
+  | .inactive, .activate => activeState
+  | .active, .deactivate => ⟨.inactive, false, false, false⟩
+  | .inactive, .cleanup => initial
+  | _, .shutdown => ⟨.finalized, false, false, false⟩
+  | _, .recoverFromError => initial
+  | _, _ => state
+
+end VerifiedAgenticWorkshop.Scenarios.LifecycleResources

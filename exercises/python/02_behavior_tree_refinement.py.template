@@ -1,0 +1,59 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+from enum import Enum, auto
+from itertools import product
+
+
+class Decision(Enum):
+    STOP_AND_CANCEL = auto()
+    REPORT_SUCCESS = auto()
+    DRIVE = auto()
+    REQUEST_PLAN = auto()
+
+
+@dataclass(frozen=True)
+class Observation:
+    cancel_requested: bool
+    goal_reached: bool
+    path_available: bool
+
+
+def bt_decision(observation: Observation) -> Decision:
+    if observation.cancel_requested:
+        return Decision.STOP_AND_CANCEL
+    if observation.goal_reached:
+        return Decision.REPORT_SUCCESS
+    if observation.path_available:
+        return Decision.DRIVE
+    return Decision.REQUEST_PLAN
+
+
+def buggy_fsm_decision(observation: Observation) -> Decision:
+    if observation.path_available:
+        return Decision.DRIVE
+    if observation.cancel_requested:
+        return Decision.STOP_AND_CANCEL
+    if observation.goal_reached:
+        return Decision.REPORT_SUCCESS
+    return Decision.REQUEST_PLAN
+
+
+def fsm_decision(observation: Observation) -> Decision:
+    """TODO: repair the handwritten FSM priority order."""
+    raise NotImplementedError
+
+
+def all_observations() -> list[Observation]:
+    return [Observation(*values) for values in product((False, True), repeat=3)]
+
+
+def main() -> None:
+    counterexample = Observation(True, False, True)
+    assert buggy_fsm_decision(counterexample) != bt_decision(counterexample)
+    assert all(fsm_decision(obs) == bt_decision(obs) for obs in all_observations())
+    print("exercise completed")
+
+
+if __name__ == "__main__":
+    main()

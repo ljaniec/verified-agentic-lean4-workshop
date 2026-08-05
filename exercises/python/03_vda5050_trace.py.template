@@ -1,0 +1,68 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import TypeAlias
+
+
+@dataclass(frozen=True)
+class OrderMessage:
+    order_id: int
+    order_update_id: int
+
+
+@dataclass(frozen=True)
+class StateMessage:
+    order_id: int
+    last_node_sequence_id: int
+
+
+Message: TypeAlias = OrderMessage | StateMessage
+
+
+@dataclass(frozen=True)
+class Monitor:
+    current_order: int | None = None
+    last_order_update_id: int = 0
+    last_node_sequence_id: int = 0
+
+
+def step(monitor: Monitor, message: Message) -> Monitor | None:
+    """TODO: enforce the four semantic rules described in the workshop."""
+    raise NotImplementedError
+
+
+def run(trace: list[Message]) -> Monitor | None:
+    monitor = Monitor()
+    for message in trace:
+        next_monitor = step(monitor, message)
+        if next_monitor is None:
+            return None
+        monitor = next_monitor
+    return monitor
+
+
+def main() -> None:
+    valid_trace: list[Message] = [
+        OrderMessage(7, 0),
+        StateMessage(7, 2),
+        OrderMessage(7, 1),
+        StateMessage(7, 4),
+    ]
+    stale_update_trace: list[Message] = [
+        OrderMessage(7, 0),
+        OrderMessage(7, 0),
+    ]
+    regressing_state_trace: list[Message] = [
+        OrderMessage(7, 0),
+        StateMessage(7, 4),
+        StateMessage(7, 3),
+    ]
+
+    assert run(valid_trace) == Monitor(7, 1, 4)
+    assert run(stale_update_trace) is None
+    assert run(regressing_state_trace) is None
+    print("exercise completed")
+
+
+if __name__ == "__main__":
+    main()

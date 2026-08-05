@@ -1,0 +1,33 @@
+import VerifiedAgenticWorkshop.Scenarios.LifecycleResources
+import LeanCopilot
+
+namespace WorkshopExercise.LifecycleResources
+
+open VerifiedAgenticWorkshop.Scenarios.LifecycleResources
+
+/-!
+# Exercise 1: lifecycle + sensor + disk
+
+1. Prove that the initial state is safe.
+2. Exhibit the bug in `buggyStep` after deactivation.
+3. Prove that the corrected `step` preserves `Safe`.
+
+Try `suggest_tactics`, `search_proof`, `select_premises`, `simp`, and exhaustive
+case analysis. Do not use `sorry`, `admit`, new axioms, or trust bypasses.
+-/
+
+theorem initial_safe : Safe initial := by
+  -- TODO
+
+theorem buggy_deactivate_breaks_safety :
+    Safe activeState ∧ ¬ Safe (buggyStep activeState .deactivate) := by
+  -- TODO
+
+theorem step_preserves_safety
+    (state : State)
+    (event : Event)
+    (safe : Safe state) :
+    Safe (step state event) := by
+  -- TODO
+
+end WorkshopExercise.LifecycleResources

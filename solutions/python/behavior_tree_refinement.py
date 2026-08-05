@@ -1,0 +1,100 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+from enum import Enum, auto
+from itertools import product
+
+
+class Decision(Enum):
+    STOP_AND_CANCEL = auto()
+    REPORT_SUCCESS = auto()
+    DRIVE = auto()
+    REQUEST_PLAN = auto()
+
+
+class Condition(Enum):
+    CANCEL_REQUESTED = auto()
+    GOAL_REACHED = auto()
+    PATH_AVAILABLE = auto()
+
+
+@dataclass(frozen=True)
+class Observation:
+    cancel_requested: bool
+    goal_reached: bool
+    path_available: bool
+
+
+@dataclass(frozen=True)
+class Branch:
+    guard: Condition
+    action: Decision
+
+
+MISSION_TREE = (
+    Branch(Condition.CANCEL_REQUESTED, Decision.STOP_AND_CANCEL),
+    Branch(Condition.GOAL_REACHED, Decision.REPORT_SUCCESS),
+    Branch(Condition.PATH_AVAILABLE, Decision.DRIVE),
+)
+
+
+def condition_holds(condition: Condition, observation: Observation) -> bool:
+    match condition:
+        case Condition.CANCEL_REQUESTED:
+            return observation.cancel_requested
+        case Condition.GOAL_REACHED:
+            return observation.goal_reached
+        case Condition.PATH_AVAILABLE:
+            return observation.path_available
+    raise AssertionError("unreachable")
+
+
+def tick_fallback(
+    branches: tuple[Branch, ...],
+    default: Decision,
+    observation: Observation,
+) -> Decision:
+    for branch in branches:
+        if condition_holds(branch.guard, observation):
+            return branch.action
+    return default
+
+
+def bt_decision(observation: Observation) -> Decision:
+    return tick_fallback(MISSION_TREE, Decision.REQUEST_PLAN, observation)
+
+
+def buggy_fsm_decision(observation: Observation) -> Decision:
+    if observation.path_available:
+        return Decision.DRIVE
+    if observation.cancel_requested:
+        return Decision.STOP_AND_CANCEL
+    if observation.goal_reached:
+        return Decision.REPORT_SUCCESS
+    return Decision.REQUEST_PLAN
+
+
+def fsm_decision(observation: Observation) -> Decision:
+    if observation.cancel_requested:
+        return Decision.STOP_AND_CANCEL
+    if observation.goal_reached:
+        return Decision.REPORT_SUCCESS
+    if observation.path_available:
+        return Decision.DRIVE
+    return Decision.REQUEST_PLAN
+
+
+def all_observations() -> list[Observation]:
+    return [Observation(*values) for values in product((False, True), repeat=3)]
+
+
+def main() -> None:
+    counterexample = Observation(True, False, True)
+    assert buggy_fsm_decision(counterexample) is Decision.DRIVE
+    assert bt_decision(counterexample) is Decision.STOP_AND_CANCEL
+    assert all(fsm_decision(obs) is bt_decision(obs) for obs in all_observations())
+    print("behavior_tree_refinement: all reference checks passed")
+
+
+if __name__ == "__main__":
+    main()

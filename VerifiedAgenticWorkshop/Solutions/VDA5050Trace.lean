@@ -16,4 +16,14 @@ theorem regressing_state_rejected :
     run initial regressingStateTrace = none := by
   decide
 
+theorem stale_update_diagnostic :
+    runDetailed initial staleUpdateTrace =
+      .error .orderUpdateNotIncreasing := by
+  decide
+
+theorem regressing_state_diagnostic :
+    runDetailed initial regressingStateTrace =
+      .error .nodeSequenceRegressed := by
+  decide
+
 end VerifiedAgenticWorkshop.Solutions.VDA5050Trace

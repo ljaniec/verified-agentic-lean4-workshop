@@ -22,6 +22,13 @@ Use the scenario loader instead of copying files manually:
 ./workshop scenario check
 ```
 
+Loading another starter or solution first backs up the current editable pair
+under `playground/backups/`. Inspect the loaded source with:
+
+```bash
+./workshop scenario status
+```
+
 ## 1. Lifecycle resources
 
 **Role:** shared introductory exercise.
@@ -31,6 +38,10 @@ sensor handle, a log file, and actuator authority. The deliberately faulty
 `deactivate` transition changes only the lifecycle mode. The exercise exposes
 the resulting unsafe state and proves that the corrected transition system
 preserves the application invariant.
+
+The reference development then lifts one-step preservation to every finite
+lifecycle-event trace. This is the bridge from checking one transition to
+reasoning about an entire mission fragment.
 
 This follows the ROS 2 managed-node design: `Unconfigured`, `Inactive`,
 `Active`, and `Finalized` are primary states; activation may acquire resources
@@ -48,6 +59,11 @@ handwritten replacement checks path availability first and can therefore issue
 a drive command after cancellation. Participants prove the counterexample and
 then prove observational equivalence of the repaired FSM and the reference BT
 for every Boolean observation.
+
+The reference theorem also lifts pointwise equivalence to equality of all
+finite observable decision traces. This expresses a practical refactoring
+contract: internal code may change while externally relevant behavior remains
+the same.
 
 The model intentionally omits `RUNNING`, asynchronous actions, and blackboard
 state. It isolates the refactoring contract before those features are added.
@@ -77,9 +93,13 @@ invalid. The monitor checks:
 - state messages refer to the current order;
 - reported node progress never decreases.
 
-The demo rejects a stale update and a regressing state trace. It is not a
-complete VDA 5050 verifier and must not be described as certification of the
-full standard.
+The detailed monitor returns a typed violation rather than only `none`. The
+Python demonstration additionally reports the zero-based index of the first
+rejected message. The stale update and regressing progress examples therefore
+produce actionable diagnostics, not only a Boolean verdict.
+
+This is not a complete VDA 5050 verifier and must not be described as
+certification of the full standard.
 
 Official specification and JSON schemas:
 <https://github.com/VDA5050/VDA5050>
@@ -90,12 +110,18 @@ Official specification and JSON schemas:
 
 The perception component supplies a closed interval of possible obstacle
 positions. The planner may accept a path interval only when the two intervals
-are separated; otherwise it falls back or replans. Python demonstrates the
-executable policy over finite integer examples. Lean proves the universal
-contract:
+are separated; otherwise it falls back or replans.
 
-> If the planner accepts, no path point equals any obstacle position permitted
-> by the uncertainty interval.
+The demo contrasts this policy with a weaker point-estimate baseline. For path
+`[0, 8]`, a point estimate at `10` appears safe, while the certified uncertainty
+interval `[6, 10]` overlaps the path. The point baseline accepts and the
+set-valued policy falls back.
+
+Python demonstrates the executable policy over finite integer examples. Lean
+proves the universal contract:
+
+> If the set-valued planner accepts, no path point equals any obstacle position
+> permitted by the uncertainty interval.
 
 The one-dimensional interval is intentionally small. It introduces the logical
 shape later used for boxes, polytopes, reachable sets, or conformal prediction
@@ -111,3 +137,6 @@ sets without requiring those representations during the first workshop.
 | 67-77 min | VDA 5050 trace-monitor demonstration |
 | 77-87 min | Perception-planner uncertainty demonstration |
 | 87-90 min | Summary and next steps |
+
+The command-by-command instructor sequence is in
+[`docs/live-demo-script.md`](live-demo-script.md).

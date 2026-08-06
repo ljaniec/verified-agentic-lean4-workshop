@@ -12,6 +12,9 @@
 | 77-87 min | Demonstrate the perception-planner uncertainty contract. |
 | 87-90 min | Summarize what scales to richer traces, standards, and uncertainty sets. |
 
+The detailed terminal sequence and expected outputs are in
+[`live-demo-script.md`](live-demo-script.md).
+
 ## Live commands
 
 ```bash
@@ -31,6 +34,10 @@
 The starter pair is intentionally incomplete. Let participants inspect the
 Python failure and the Lean goal before using `scenario solution`.
 
+Loading a new scenario automatically saves the current editable pair under
+`playground/backups/`. Use `./workshop scenario status` before switching when
+several groups are sharing one instructor machine.
+
 ## Pre-event acceptance
 
 Ask participants to complete exactly these commands before arrival:
@@ -38,6 +45,12 @@ Ask participants to complete exactly these commands before arrival:
 ```bash
 ./workshop setup
 ./workshop check
+```
+
+On the instructor machine also run:
+
+```bash
+./workshop scenario verify-solutions
 ```
 
 Collect only the final success/failure summary, not API keys or machine data.

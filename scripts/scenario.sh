@@ -3,6 +3,7 @@ set -Eeuo pipefail
 source "$(dirname -- "${BASH_SOURCE[0]}")/common.sh"
 
 CURRENT_DIR="$REPOSITORY_ROOT/playground/current"
+BACKUP_ROOT="$REPOSITORY_ROOT/playground/backups"
 
 usage() {
   cat <<'USAGE'
@@ -12,8 +13,10 @@ Commands:
   list                     List available scenarios.
   start <name>             Load the unsolved Lean and Python starters.
   solution <name>          Load the reference Lean and Python solutions.
+  status                   Show the currently loaded scenario and source.
   check                    Compile and run the currently loaded pair.
-  clean                    Remove the currently loaded pair.
+  verify-solutions         Check every committed reference solution.
+  clean                    Back up and remove the currently loaded pair.
 
 Scenario names:
   lifecycle                ROS 2 lifecycle + sensor + log + actuator
@@ -55,28 +58,70 @@ scenario_files() {
   esac
 }
 
+backup_current() {
+  if [[ ! -f "$CURRENT_DIR/Current.lean" && ! -f "$CURRENT_DIR/current.py" ]]; then
+    return
+  fi
+
+  local scenario source timestamp backup_dir
+  scenario="$(cat "$CURRENT_DIR/scenario" 2>/dev/null || printf 'unknown')"
+  source="$(cat "$CURRENT_DIR/source" 2>/dev/null || printf 'unknown')"
+  timestamp="$(date -u '+%Y%m%dT%H%M%SZ')"
+  backup_dir="$BACKUP_ROOT/${timestamp}-${scenario}-${source}-$$"
+  mkdir -p "$backup_dir"
+
+  for filename in Current.lean current.py scenario source; do
+    if [[ -f "$CURRENT_DIR/$filename" ]]; then
+      cp "$CURRENT_DIR/$filename" "$backup_dir/$filename"
+    fi
+  done
+
+  log "Backed up the current work to ${backup_dir#$REPOSITORY_ROOT/}"
+}
+
+write_metadata() {
+  local scenario="$1"
+  local source="$2"
+  printf '%s\n' "$scenario" > "$CURRENT_DIR/scenario"
+  printf '%s\n' "$source" > "$CURRENT_DIR/source"
+}
+
 load_start() {
   local scenario="$1"
   scenario_files "$scenario"
+  backup_current
   mkdir -p "$CURRENT_DIR"
   cp "$REPOSITORY_ROOT/exercises/lean/$LEAN_STEM.lean.template" \
     "$CURRENT_DIR/Current.lean"
   cp "$REPOSITORY_ROOT/exercises/python/$PYTHON_STEM.py.template" \
     "$CURRENT_DIR/current.py"
-  printf '%s\n' "$scenario" > "$CURRENT_DIR/scenario"
+  write_metadata "$scenario" "starter"
   log "Loaded unsolved '$scenario' scenario into playground/current"
 }
 
 load_solution() {
   local scenario="$1"
   scenario_files "$scenario"
+  backup_current
   mkdir -p "$CURRENT_DIR"
   cp "$REPOSITORY_ROOT/VerifiedAgenticWorkshop/Solutions/$SOLUTION_LEAN.lean" \
     "$CURRENT_DIR/Current.lean"
   cp "$REPOSITORY_ROOT/solutions/python/$SOLUTION_PYTHON.py" \
     "$CURRENT_DIR/current.py"
-  printf '%s\n' "$scenario" > "$CURRENT_DIR/scenario"
+  write_metadata "$scenario" "reference-solution"
   log "Loaded reference solution for '$scenario'"
+}
+
+show_status() {
+  if [[ ! -f "$CURRENT_DIR/scenario" ]]; then
+    printf 'No scenario is currently loaded.\n'
+    return
+  fi
+
+  printf 'Scenario: %s\n' "$(cat "$CURRENT_DIR/scenario")"
+  printf 'Source:   %s\n' "$(cat "$CURRENT_DIR/source" 2>/dev/null || printf 'unknown')"
+  printf 'Lean:     %s\n' "${CURRENT_DIR#$REPOSITORY_ROOT/}/Current.lean"
+  printf 'Python:   %s\n' "${CURRENT_DIR#$REPOSITORY_ROOT/}/current.py"
 }
 
 check_current() {
@@ -88,11 +133,37 @@ check_current() {
     fail "current Python exercise is missing"
 
   cd "$REPOSITORY_ROOT"
+  log "Scanning the current Lean exercise for proof bypasses"
+  "$REPOSITORY_ROOT/scripts/check_forbidden_constructs.sh" \
+    "$CURRENT_DIR/Current.lean"
   log "Checking current Lean exercise"
-  lake env lean "$CURRENT_DIR/Current.lean"
+  lake env lean -DwarningAsError=true "$CURRENT_DIR/Current.lean"
+  log "Checking current Python syntax"
+  python3 -m py_compile "$CURRENT_DIR/current.py"
   log "Running current Python exercise"
   python3 "$CURRENT_DIR/current.py"
   log "Current scenario passed both checks"
+}
+
+verify_solutions() {
+  require_command lake
+  require_command python3
+  cd "$REPOSITORY_ROOT"
+
+  "$REPOSITORY_ROOT/scripts/check_forbidden_constructs.sh"
+
+  for lean_file in VerifiedAgenticWorkshop/Solutions/*.lean; do
+    log "Checking $lean_file"
+    lake env lean -DwarningAsError=true "$lean_file"
+  done
+
+  for python_file in solutions/python/*.py; do
+    log "Checking $python_file"
+    python3 -m py_compile "$python_file"
+    python3 "$python_file"
+  done
+
+  log "All committed scenario solutions passed"
 }
 
 command_name="${1:-list}"
@@ -112,12 +183,21 @@ case "$command_name" in
     [[ $# -eq 1 ]] || fail "usage: ./workshop scenario solution <name>"
     load_solution "$1"
     ;;
+  status)
+    [[ $# -eq 0 ]] || fail "usage: ./workshop scenario status"
+    show_status
+    ;;
   check)
     [[ $# -eq 0 ]] || fail "usage: ./workshop scenario check"
     check_current
     ;;
+  verify-solutions)
+    [[ $# -eq 0 ]] || fail "usage: ./workshop scenario verify-solutions"
+    verify_solutions
+    ;;
   clean)
     [[ $# -eq 0 ]] || fail "usage: ./workshop scenario clean"
+    backup_current
     rm -rf -- "$CURRENT_DIR"
     log "Removed playground/current"
     ;;

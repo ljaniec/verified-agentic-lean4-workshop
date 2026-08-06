@@ -41,7 +41,7 @@ DOCTOR_ARGS=()
 if [[ "$LEAN_ONLY" -eq 1 ]]; then
   DOCTOR_ARGS+=(--lean-only)
 fi
-"$REPOSITORY_ROOT/scripts/workshop_doctor.sh" "${DOCTOR_ARGS[@]}"
+bash "$REPOSITORY_ROOT/scripts/workshop_doctor.sh" "${DOCTOR_ARGS[@]}"
 
 require_command git
 require_command lake

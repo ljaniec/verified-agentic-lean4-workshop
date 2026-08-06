@@ -12,8 +12,10 @@ if [[ $# -gt 0 ]]; then
   lean_files=("$@")
 else
   mapfile -t lean_files < <(
-    find VerifiedAgenticWorkshop playground \
-      -type f -name '*.lean' -print 2>/dev/null | sort
+    {
+      find VerifiedAgenticWorkshop -type f -name '*.lean' -print 2>/dev/null
+      find playground -maxdepth 1 -type f -name '*.lean' -print 2>/dev/null
+    } | sort
   )
 fi
 

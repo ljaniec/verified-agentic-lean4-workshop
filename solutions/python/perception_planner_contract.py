@@ -28,6 +28,12 @@ def decide_plan(path: Interval, obstacle: Interval) -> PlannerDecision:
     return PlannerDecision.FALLBACK
 
 
+def decide_from_point_estimate(path: Interval, estimate: int) -> PlannerDecision:
+    if path.contains(estimate):
+        return PlannerDecision.FALLBACK
+    return PlannerDecision.ACCEPT
+
+
 def accepted_plan_is_collision_free(path: Interval, obstacle: Interval) -> bool:
     if decide_plan(path, obstacle) is not PlannerDecision.ACCEPT:
         return True
@@ -45,11 +51,16 @@ def main() -> None:
     separated_obstacle = Interval(7, 10)
     overlapping_path = Interval(0, 8)
     overlapping_obstacle = Interval(6, 10)
+    point_estimate = 10
 
     assert decide_plan(separated_path, separated_obstacle) is PlannerDecision.ACCEPT
     assert (
         decide_plan(overlapping_path, overlapping_obstacle)
         is PlannerDecision.FALLBACK
+    )
+    assert (
+        decide_from_point_estimate(overlapping_path, point_estimate)
+        is PlannerDecision.ACCEPT
     )
     assert accepted_plan_is_collision_free(separated_path, separated_obstacle)
     print("perception_planner_contract: all reference checks passed")

@@ -74,6 +74,12 @@ def fsmDecision (observation : Observation) : Decision :=
   else
     .requestPlan
 
+/-- Observable decisions generated over a finite sequence of ticks. -/
+def decisionTrace
+    (policy : Observation → Decision)
+    (observations : List Observation) : List Decision :=
+  observations.map policy
+
 def cancelWhilePathAvailable : Observation :=
   ⟨true, false, true⟩
 

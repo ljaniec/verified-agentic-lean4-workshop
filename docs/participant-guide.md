@@ -31,6 +31,7 @@ List and load a scenario:
 ```bash
 ./workshop scenario list
 ./workshop scenario start lifecycle
+./workshop scenario status
 ```
 
 Edit both files:
@@ -45,6 +46,13 @@ Check them together:
 ```bash
 ./workshop scenario check
 ```
+
+The checker:
+
+- rejects explicit proof holes and trust bypasses;
+- treats Lean warnings as errors for the current exercise;
+- compiles the exact Lean file;
+- checks Python syntax and executes the Python exercise.
 
 A failing Python assertion gives a concrete execution counterexample. A failing
 Lean theorem shows that the universal claim is not yet proved. Generated model
@@ -65,7 +73,11 @@ Reveal a reference solution only after attempting the exercise:
 ./workshop scenario check
 ```
 
-Remove the current pair with:
+Your current pair is backed up automatically before another starter or solution
+is loaded. Local copies are stored under `playground/backups/` and are not
+committed.
+
+Remove the current pair, while retaining a backup, with:
 
 ```bash
 ./workshop scenario clean

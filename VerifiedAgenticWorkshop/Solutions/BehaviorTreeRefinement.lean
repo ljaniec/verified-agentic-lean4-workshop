@@ -17,4 +17,10 @@ theorem corrected_fsm_matches_bt (observation : Observation) :
     cases pathAvailable <;>
     rfl
 
+/-- Pointwise equivalence lifts to every finite observable execution trace. -/
+theorem corrected_fsm_trace_matches_bt (observations : List Observation) :
+    decisionTrace fsmDecision observations =
+      decisionTrace btDecision observations := by
+  simp [decisionTrace, corrected_fsm_matches_bt]
+
 end VerifiedAgenticWorkshop.Solutions.BehaviorTreeRefinement

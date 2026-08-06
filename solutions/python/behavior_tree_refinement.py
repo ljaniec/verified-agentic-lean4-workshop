@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum, auto
 from itertools import product
+from typing import Callable, Iterable
 
 
 class Decision(Enum):
@@ -84,15 +85,27 @@ def fsm_decision(observation: Observation) -> Decision:
     return Decision.REQUEST_PLAN
 
 
+def decision_trace(
+    policy: Callable[[Observation], Decision], observations: Iterable[Observation]
+) -> list[Decision]:
+    return [policy(observation) for observation in observations]
+
+
 def all_observations() -> list[Observation]:
     return [Observation(*values) for values in product((False, True), repeat=3)]
 
 
 def main() -> None:
     counterexample = Observation(True, False, True)
+    trace = [
+        Observation(False, False, False),
+        Observation(False, False, True),
+        counterexample,
+    ]
     assert buggy_fsm_decision(counterexample) is Decision.DRIVE
     assert bt_decision(counterexample) is Decision.STOP_AND_CANCEL
     assert all(fsm_decision(obs) is bt_decision(obs) for obs in all_observations())
+    assert decision_trace(fsm_decision, trace) == decision_trace(bt_decision, trace)
     print("behavior_tree_refinement: all reference checks passed")
 
 

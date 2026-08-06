@@ -134,7 +134,7 @@ check_current() {
 
   cd "$REPOSITORY_ROOT"
   log "Scanning the current Lean exercise for proof bypasses"
-  "$REPOSITORY_ROOT/scripts/check_forbidden_constructs.sh" \
+  bash "$REPOSITORY_ROOT/scripts/check_forbidden_constructs.sh" \
     "$CURRENT_DIR/Current.lean"
   log "Checking current Lean exercise"
   lake env lean -DwarningAsError=true "$CURRENT_DIR/Current.lean"
@@ -150,7 +150,7 @@ verify_solutions() {
   require_command python3
   cd "$REPOSITORY_ROOT"
 
-  "$REPOSITORY_ROOT/scripts/check_forbidden_constructs.sh"
+  bash "$REPOSITORY_ROOT/scripts/check_forbidden_constructs.sh"
 
   for lean_file in VerifiedAgenticWorkshop/Solutions/*.lean; do
     log "Checking $lean_file"

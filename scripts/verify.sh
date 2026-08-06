@@ -12,16 +12,16 @@ if [[ $# -ne 0 ]]; then
   fail "usage: scripts/verify.sh [--lean-only]"
 fi
 
-"$REPOSITORY_ROOT/scripts/check_no_github_actions.sh"
+bash "$REPOSITORY_ROOT/scripts/check_no_github_actions.sh"
 
 bash -n "$REPOSITORY_ROOT/workshop"
 for script in scripts/*.sh; do
   bash -n "$script"
 done
 
-"$REPOSITORY_ROOT/scripts/verify_lean.sh"
+bash "$REPOSITORY_ROOT/scripts/verify_lean.sh"
 if [[ "$LEAN_ONLY" -eq 0 ]]; then
-  "$REPOSITORY_ROOT/scripts/verify_python.sh"
+  bash "$REPOSITORY_ROOT/scripts/verify_python.sh"
 fi
 
 log "All requested local acceptance checks passed"

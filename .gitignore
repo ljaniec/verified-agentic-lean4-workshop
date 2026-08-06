@@ -33,6 +33,7 @@ artifacts/
 logs/
 workshop-output/
 playground/current/
+playground/backups/
 
 # Editors and operating systems
 .DS_Store

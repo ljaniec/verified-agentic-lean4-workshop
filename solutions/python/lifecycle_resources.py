@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum, auto
 from itertools import product
+from typing import Iterable
 
 
 class Mode(Enum):
@@ -83,6 +84,12 @@ def step(state: State, event: Event) -> State:
     return state
 
 
+def run(state: State, events: Iterable[Event]) -> State:
+    for event in events:
+        state = step(state, event)
+    return state
+
+
 def all_states() -> list[State]:
     return [
         State(mode, sensor, log, actuator)
@@ -102,10 +109,12 @@ def preservation_holds() -> bool:
 
 
 def main() -> None:
+    nominal_trace = [Event.CONFIGURE, Event.ACTIVATE, Event.DEACTIVATE, Event.CLEANUP]
     assert safe(INITIAL)
     assert safe(ACTIVE_STATE)
     assert not safe(buggy_step(ACTIVE_STATE, Event.DEACTIVATE))
     assert preservation_holds()
+    assert safe(run(INITIAL, nominal_trace))
     print("lifecycle_resources: all reference checks passed")
 
 

@@ -29,6 +29,16 @@ structure Monitor where
   lastNodeSequenceId : Nat
   deriving DecidableEq, Repr
 
+/-- A typed explanation of why the first invalid message was rejected. -/
+inductive Violation where
+  | firstOrderUpdateMustBeZero
+  | orderUpdateNotIncreasing
+  | newOrderMustStartAtZero
+  | stateWithoutOrder
+  | stateOrderMismatch
+  | nodeSequenceRegressed
+  deriving DecidableEq, Repr
+
 def initial : Monitor :=
   ⟨none, 0, 0⟩
 
@@ -36,43 +46,58 @@ def initial : Monitor :=
 The local teaching policy checks new-order initialization, increasing updates,
 matching order identifiers, and nondecreasing reported node progress.
 -/
-def step (monitor : Monitor) (message : Message) : Option Monitor :=
+def checkStep (monitor : Monitor) (message : Message) : Except Violation Monitor :=
   match message with
   | .order orderMessage =>
       match monitor.currentOrder with
       | none =>
           if orderMessage.orderUpdateId = 0 then
-            some ⟨some orderMessage.orderId, 0, 0⟩
+            .ok ⟨some orderMessage.orderId, 0, 0⟩
           else
-            none
+            .error .firstOrderUpdateMustBeZero
       | some currentOrder =>
           if orderMessage.orderId = currentOrder then
             if monitor.lastOrderUpdateId < orderMessage.orderUpdateId then
-              some { monitor with
+              .ok { monitor with
                 lastOrderUpdateId := orderMessage.orderUpdateId }
             else
-              none
+              .error .orderUpdateNotIncreasing
           else if orderMessage.orderUpdateId = 0 then
-            some ⟨some orderMessage.orderId, 0, 0⟩
+            .ok ⟨some orderMessage.orderId, 0, 0⟩
           else
-            none
+            .error .newOrderMustStartAtZero
   | .state stateMessage =>
       match monitor.currentOrder with
-      | none => none
+      | none => .error .stateWithoutOrder
       | some currentOrder =>
-          if stateMessage.orderId = currentOrder ∧
-              monitor.lastNodeSequenceId ≤ stateMessage.lastNodeSequenceId then
-            some { monitor with
-              lastNodeSequenceId := stateMessage.lastNodeSequenceId }
+          if stateMessage.orderId = currentOrder then
+            if monitor.lastNodeSequenceId ≤ stateMessage.lastNodeSequenceId then
+              .ok { monitor with
+                lastNodeSequenceId := stateMessage.lastNodeSequenceId }
+            else
+              .error .nodeSequenceRegressed
           else
-            none
+            .error .stateOrderMismatch
 
-def run : Monitor → List Message → Option Monitor
-  | monitor, [] => some monitor
+/-- Compatibility projection used by the smallest exercise. -/
+def step (monitor : Monitor) (message : Message) : Option Monitor :=
+  match checkStep monitor message with
+  | .ok next => some next
+  | .error _ => none
+
+/-- Check a full trace while preserving the first semantic violation. -/
+def runDetailed : Monitor → List Message → Except Violation Monitor
+  | monitor, [] => .ok monitor
   | monitor, message :: rest =>
-      match step monitor message with
-      | none => none
-      | some next => run next rest
+      match checkStep monitor message with
+      | .ok next => runDetailed next rest
+      | .error violation => .error violation
+
+/-- Compatibility projection that accepts or rejects without diagnostics. -/
+def run (monitor : Monitor) (messages : List Message) : Option Monitor :=
+  match runDetailed monitor messages with
+  | .ok next => some next
+  | .error _ => none
 
 def validTrace : List Message :=
   [ .order ⟨7, 0⟩,

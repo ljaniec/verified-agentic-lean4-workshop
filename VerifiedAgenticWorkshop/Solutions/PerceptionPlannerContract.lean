@@ -12,6 +12,12 @@ theorem overlapping_example_falls_back :
     decidePlan overlappingPath overlappingObstacle = .fallback := by
   decide
 
+/-- A point estimate can look safe while the certified uncertainty overlaps. -/
+theorem point_estimate_can_miss_uncertainty :
+    decideFromPointEstimate overlappingPath misleadingPointEstimate = .accept ∧
+      decidePlan overlappingPath overlappingObstacle = .fallback := by
+  decide
+
 theorem accept_implies_no_collision
     (path obstacle : Interval)
     (accepted : decidePlan path obstacle = .accept) :

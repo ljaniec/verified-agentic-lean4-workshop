@@ -9,8 +9,8 @@ open VerifiedAgenticWorkshop.Scenarios.PerceptionPlannerContract
 # Demonstration: perception-planner uncertainty contract
 
 The planner sees an uncertainty interval, not one guessed obstacle position.
-Prove the two executable examples and the universal soundness property of an
-accepted plan.
+Prove the executable examples, show that a point estimate can be misleading,
+and prove the universal soundness property of every accepted plan.
 -/
 
 theorem separated_example_accepted :
@@ -19,6 +19,11 @@ theorem separated_example_accepted :
 
 theorem overlapping_example_falls_back :
     decidePlan overlappingPath overlappingObstacle = .fallback := by
+  -- TODO
+
+theorem point_estimate_can_miss_uncertainty :
+    decideFromPointEstimate overlappingPath misleadingPointEstimate = .accept ∧
+      decidePlan overlappingPath overlappingObstacle = .fallback := by
   -- TODO
 
 theorem accept_implies_no_collision

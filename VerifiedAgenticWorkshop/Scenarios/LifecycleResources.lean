@@ -81,4 +81,9 @@ def step (state : State) (event : Event) : State :=
   | _, .recoverFromError => initial
   | _, _ => state
 
+/-- Execute a finite lifecycle-event trace. -/
+def run : State → List Event → State
+  | state, [] => state
+  | state, event :: rest => run (step state event) rest
+
 end VerifiedAgenticWorkshop.Scenarios.LifecycleResources

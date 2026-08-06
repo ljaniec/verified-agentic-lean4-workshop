@@ -56,6 +56,7 @@ checked reference solutions in both languages.
 ```bash
 ./workshop scenario list
 ./workshop scenario start lifecycle
+./workshop scenario status
 ./workshop scenario check
 
 # Reveal the reference pair when needed.
@@ -70,8 +71,20 @@ playground/current/Current.lean
 playground/current/current.py
 ```
 
-See [the scenario guide](docs/scenarios.md) and
-[the 90-minute plan](docs/workshop-plan.md).
+Before another starter or solution is loaded, the current pair is backed up
+under `playground/backups/`. The scenario checker rejects explicit proof holes,
+treats Lean warnings as errors, compiles the exact Lean file, and executes the
+matching Python program.
+
+The instructor can validate every committed reference pair with:
+
+```bash
+./workshop scenario verify-solutions
+```
+
+See [the scenario guide](docs/scenarios.md),
+[the 90-minute plan](docs/workshop-plan.md), and
+[the live demonstration script](docs/live-demo-script.md).
 
 ## Lean Copilot
 
@@ -137,7 +150,7 @@ Lean build and committed playground, Ruff, mypy, and pytest.
 VerifiedAgenticWorkshop/   checked Lean models and reference proofs
 exercises/                  unsolved Lean and Python templates
 solutions/python/           executable Python reference solutions
-playground/                 participant workspace
+playground/                 participant workspace and ignored backups
 agents/                     optional Google ADK agent
 src/                        constrained Lean tool implementation
 tests/                      local Python tests

@@ -11,6 +11,8 @@ from solutions.python.lifecycle_resources import (
     ACTIVE_STATE,
     INITIAL,
     Event,
+    Mode,
+    State,
     buggy_step,
     preservation_holds,
     run as run_lifecycle,
@@ -36,6 +38,8 @@ from solutions.python.vda5050_trace import (
 
 
 def test_lifecycle_reference_solution() -> None:
+    inactive_with_open_resources = State(Mode.INACTIVE, True, True, False)
+    assert not safe(inactive_with_open_resources)
     assert not safe(buggy_step(ACTIVE_STATE, Event.DEACTIVATE))
     assert preservation_holds()
     assert safe(

@@ -18,7 +18,9 @@ _ALLOWED_ROOTS: Final[tuple[Path, ...]] = (
     _REPOSITORY_ROOT / "VerifiedAgenticWorkshop" / "Workshop",
 )
 _FORBIDDEN_PATTERN: Final[re.Pattern[str]] = re.compile(
-    r"\b(sorry|admit|axiom|native_decide|implemented_by)\b"
+    r"(?<![A-Za-z0-9_])"
+    r"(sorry|admit|axiom|constant|sorryAx|native_decide|implemented_by)"
+    r"(?![A-Za-z0-9_])"
 )
 
 
@@ -59,6 +61,63 @@ def _resolve_lean_file(relative_path: str) -> Path:
     return candidate
 
 
+def _code_lines(source: str) -> list[str]:
+    """Remove Lean comments and string contents while preserving line numbers."""
+
+    code_lines: list[str] = []
+    block_depth = 0
+
+    for line in source.splitlines():
+        code: list[str] = []
+        in_string = False
+        escaped = False
+        index = 0
+
+        while index < len(line):
+            char = line[index]
+            next_char = line[index + 1] if index + 1 < len(line) else ""
+
+            if block_depth > 0:
+                if char == "/" and next_char == "-":
+                    block_depth += 1
+                    index += 2
+                    continue
+                if char == "-" and next_char == "/":
+                    block_depth -= 1
+                    index += 2
+                    continue
+                index += 1
+                continue
+
+            if in_string:
+                if escaped:
+                    escaped = False
+                elif char == "\\":
+                    escaped = True
+                elif char == '"':
+                    in_string = False
+                index += 1
+                continue
+
+            if char == "-" and next_char == "-":
+                break
+            if char == "/" and next_char == "-":
+                block_depth += 1
+                index += 2
+                continue
+            if char == '"':
+                in_string = True
+                index += 1
+                continue
+
+            code.append(char)
+            index += 1
+
+        code_lines.append("".join(code))
+
+    return code_lines
+
+
 def list_lean_files() -> dict[str, object]:
     """List Lean files that the workshop agent is allowed to inspect."""
 
@@ -91,12 +150,19 @@ def scan_lean_file(relative_path: str) -> dict[str, object]:
 
     try:
         path = _resolve_lean_file(relative_path)
+        source = path.read_text(encoding="utf-8")
+        original_lines = source.splitlines()
         matches: list[dict[str, object]] = []
-        for line_number, line in enumerate(
-            path.read_text(encoding="utf-8").splitlines(), start=1
-        ):
-            if _FORBIDDEN_PATTERN.search(line):
-                matches.append({"line": line_number, "text": line.strip()})
+
+        for line_number, code in enumerate(_code_lines(source), start=1):
+            if _FORBIDDEN_PATTERN.search(code):
+                matches.append(
+                    {
+                        "line": line_number,
+                        "text": original_lines[line_number - 1].strip(),
+                    }
+                )
+
         return {
             "status": "success" if not matches else "rejected",
             "path": str(path.relative_to(_REPOSITORY_ROOT)),
@@ -120,7 +186,13 @@ def check_lean_file(relative_path: str) -> dict[str, object]:
     try:
         path = _resolve_lean_file(relative_path)
         completed = subprocess.run(
-            ["lake", "env", "lean", str(path.relative_to(_REPOSITORY_ROOT))],
+            [
+                "lake",
+                "env",
+                "lean",
+                "-DwarningAsError=true",
+                str(path.relative_to(_REPOSITORY_ROOT)),
+            ],
             cwd=_REPOSITORY_ROOT,
             check=False,
             capture_output=True,

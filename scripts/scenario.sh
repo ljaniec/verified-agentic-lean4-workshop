@@ -58,14 +58,33 @@ scenario_files() {
   esac
 }
 
+safe_metadata_value() {
+  local kind="$1"
+  local value="$2"
+
+  case "$kind:$value" in
+    scenario:lifecycle|scenario:bt|scenario:vda|scenario:uncertainty)
+      printf '%s' "$value"
+      ;;
+    source:starter|source:reference-solution)
+      printf '%s' "$value"
+      ;;
+    *)
+      printf 'unknown'
+      ;;
+  esac
+}
+
 backup_current() {
   if [[ ! -f "$CURRENT_DIR/Current.lean" && ! -f "$CURRENT_DIR/current.py" ]]; then
     return
   fi
 
-  local scenario source timestamp backup_dir
-  scenario="$(cat "$CURRENT_DIR/scenario" 2>/dev/null || printf 'unknown')"
-  source="$(cat "$CURRENT_DIR/source" 2>/dev/null || printf 'unknown')"
+  local raw_scenario raw_source scenario source timestamp backup_dir
+  raw_scenario="$(cat "$CURRENT_DIR/scenario" 2>/dev/null || printf 'unknown')"
+  raw_source="$(cat "$CURRENT_DIR/source" 2>/dev/null || printf 'unknown')"
+  scenario="$(safe_metadata_value scenario "$raw_scenario")"
+  source="$(safe_metadata_value source "$raw_source")"
   timestamp="$(date -u '+%Y%m%dT%H%M%SZ')"
   backup_dir="$BACKUP_ROOT/${timestamp}-${scenario}-${source}-$$"
   mkdir -p "$backup_dir"

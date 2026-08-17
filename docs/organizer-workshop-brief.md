@@ -2,7 +2,7 @@
 
 ## From Hallucination to Proof: Trustworthy AI Agents with Gemini and Lean 4
 
-**Working document for discussion with event organizers**
+**Working document for discussion with event organizers and targeted Google-tooling support**
 
 - **Format:** 90-minute hands-on workshop
 - **Presentation language:** English
@@ -15,15 +15,17 @@
 
 ## 1. Purpose of this document
 
-This document consolidates the workshop concept developed so far and is intended to be the starting point for discussion with the organizers.
+This document consolidates the current workshop concept and is the main starting point for discussion with the event organizers.
 
-Because the event is Google-centered, the Google technology stack should not appear as a cosmetic addition. The goal is to make **Google Antigravity, Gemini, and Google Agent Development Kit (ADK)** integral parts of the workflow while keeping the central technical message scientifically honest:
+It also records open questions about the Google technology stack so that targeted technical advice can be requested without transferring ownership of the workshop design.
+
+The workshop is prepared and owned end-to-end by the presenter. External support, including help from Adrian Romański, is advisory and focused primarily on using Google technologies correctly and pragmatically. The workshop content, robotics examples, Lean formalization, repository architecture, participant setup, demonstrations, and final implementation remain the presenter's responsibility.
+
+Because the event is Google-centered, the Google technology stack should not appear as a cosmetic addition. The goal is to make **Google Antigravity, Gemini, and Google Agent Development Kit (ADK)** genuine parts of the workflow while keeping the central technical message scientifically honest:
 
 > Generative AI can be extremely useful even when we do not blindly trust its output.
 
 The workshop combines agentic software development with formal verification. Gemini can analyze requirements, suggest invariants, generate proof candidates, interpret compiler feedback, and repair failed attempts. ADK provides a controlled tool-use loop. Antigravity provides the developer-facing environment. Lean 4 remains the independent authority that decides whether the formal claim actually holds.
-
-This creates a natural trust boundary:
 
 ```text
 human intent
@@ -48,7 +50,7 @@ The workshop is not intended to teach formal methods as an abstract mathematical
 
 ---
 
-## 2. Why this workshop
+## 2. Workshop thesis
 
 Modern AI systems are increasingly good at:
 
@@ -85,6 +87,12 @@ formal verification
 ```
 
 The final result is not accepted because Gemini, Lean Copilot, a local theorem-proving model, or another prover says that it is correct. It is accepted because the Lean kernel checks the proof.
+
+Two short sentences summarize the workshop:
+
+> **AI can propose; the verifier decides.**
+
+> **The agent is allowed to be wrong. The verification boundary is not.**
 
 ---
 
@@ -132,7 +140,7 @@ This story is important because it shows that formal verification is not only fo
 
 ---
 
-## 4. Working title and abstract
+## 4. Working title and abstracts
 
 ### Primary title
 
@@ -246,13 +254,17 @@ Active
 Inactive
 ```
 
-The model also contains cleanup, shutdown, and recovery paths.
-
 ### Example invariant
 
 ```text
 Active
     → sensorOpen ∧ logOpen
+
+sensorOpen
+    → Active
+
+logOpen
+    → Active
 
 actuatorEnabled
     → Active
@@ -263,6 +275,8 @@ Unconfigured ∨ Finalized
       ∧ ¬actuatorEnabled
 ```
 
+The bidirectional relationship between active state and runtime resource ownership is deliberate. An inactive node with an open sensor or log is considered unsafe in the workshop model.
+
 ### Deliberate bug
 
 The buggy implementation performs:
@@ -272,8 +286,6 @@ Active → Inactive
 ```
 
 but forgets to disable the actuator, release the sensor, and close the log.
-
-The lifecycle transition itself appears superficially correct. The application invariant is not.
 
 ### Python versus Lean
 
@@ -300,10 +312,6 @@ every reachable finite trace is safe
 
 ## 8. Core Exercise 2: Behavior Tree → handwritten FSM refinement
 
-### Motivation
-
-This exercise directly reflects the real fleet-management refactoring story.
-
 The workshop uses a deliberately simplified Behavior Tree:
 
 ```text
@@ -316,8 +324,6 @@ Fallback [
 ```
 
 Cancellation has the highest priority.
-
-### Deliberate refactoring bug
 
 The buggy handwritten state logic checks `pathAvailable` before `cancelRequested`.
 
@@ -335,43 +341,17 @@ reference BT → stopAndCancel
 buggy FSM    → drive
 ```
 
-This is an ideal formal-methods example because the bug is simple enough to understand immediately but realistic enough to matter.
-
-### What Lean proves
-
 The reference development proves:
 
 1. a concrete counterexample to the buggy implementation;
 2. pointwise equivalence of the repaired FSM and the reference BT;
 3. equality of their observable decisions over every finite observation trace.
 
-The conceptual progression is:
-
-```text
-example test
-    ↓
-counterexample
-    ↓
-universal statement for one observation
-    ↓
-trace-level equivalence
-```
-
-### Scope limitation
-
-The first workshop model intentionally omits:
-
-- `RUNNING`;
-- asynchronous Behavior Tree actions;
-- blackboard state;
-- action cancellation internals;
-- concurrent subtrees.
-
-These features are important, but they would turn the session into a BehaviorTree.CPP semantics project rather than a first introduction to refinement.
+The first workshop model intentionally omits `RUNNING`, asynchronous Behavior Tree actions, blackboard state, action cancellation internals, and concurrent subtrees. Those features are valuable future extensions, but would overload a first 90-minute workshop.
 
 ---
 
-## 9. Demo 1: VDA 5050-style temporal conformance
+## 9. Demo: VDA 5050-style temporal conformance
 
 Industrial standards are a strong example of a less obvious use of formalization.
 
@@ -383,38 +363,11 @@ structural validity
 behavioral conformance
 ```
 
-The current educational profile tracks order ID, order update ID, and last reported node sequence ID.
-
-It can reject traces such as:
-
-```text
-order(7, update=0)
-order(7, update=0)
-```
-
-or:
-
-```text
-state(nodeSequence=4)
-state(nodeSequence=3)
-```
-
-The extended demonstration returns typed reasons such as:
-
-```text
-orderUpdateNotIncreasing
-nodeSequenceRegressed
-```
-
-and the Python side can report the index of the first rejected message.
-
-### Claim discipline
+The current educational profile tracks order ID, order update ID, and last reported node sequence ID. It rejects stale order updates and regressing node progress and returns typed diagnostic reasons.
 
 This must be described as **a VDA 5050-inspired teaching profile**, not a complete VDA 5050 certification tool.
 
-A real verifier would require systematic formalization of the relevant version of the standard.
-
-A future industrial direction is nevertheless clear:
+A possible future industrial direction is:
 
 ```text
 VDA 5050 version
@@ -428,9 +381,7 @@ verified conformance / counterexample
 
 ---
 
-## 10. Demo 2: perception → planner contract under uncertainty
-
-This demonstration shows that formal verification is not limited to state machines.
+## 10. Demo: perception → planner contract under uncertainty
 
 Suppose perception estimates an obstacle at:
 
@@ -451,7 +402,7 @@ A point-estimate planner may conclude:
 → ACCEPT
 ```
 
-But if the perception component actually certifies:
+But if the perception component certifies:
 
 ```text
 obstacle ∈ [6, 10]
@@ -464,14 +415,7 @@ then:
 → FALLBACK
 ```
 
-Lean proves a contract of the form:
-
-```text
-if the planner accepts,
-then for every path point
-and every obstacle position allowed by the uncertainty set,
-the two positions are different.
-```
+Lean proves that if the set-aware planner accepts, no path point coincides with any obstacle position allowed by the uncertainty interval.
 
 The one-dimensional interval is intentionally small, but the logical structure scales to bounding boxes, polytopes, reachable sets, robust planning, conformal prediction sets, and uncertainty-aware collision checking.
 
@@ -481,34 +425,26 @@ The one-dimensional interval is intentionally small, but the logical structure s
 
 The Google technologies should be part of the actual reasoning loop.
 
-### Google Antigravity IDE
+### Google Antigravity
 
-Antigravity IDE should be the main developer-facing environment for the agentic portion.
+Antigravity should be evaluated as the main developer-facing environment for the agentic portion. The important question is whether it improves the live participant workflow enough to make it recommended or required.
 
-Participants can use it to inspect the repository, edit Python and Lean files, interact with an AI coding agent, ask the agent to explain failed proofs, request invariants, generate candidate repairs, and inspect resulting changes.
-
-The useful framing is not:
-
-> “We use Antigravity because this is a Google event.”
-
-It is:
+The useful framing is:
 
 > “Antigravity is the environment in which an AI agent interacts with a formally checked codebase.”
 
 ### Gemini
 
-Gemini should act as the reasoning and repair layer.
+Gemini should act as the reasoning and repair layer. Useful tasks include:
 
-Useful tasks include:
-
-- translate an informal requirement into a candidate invariant;
-- explain why a theorem failed;
-- suggest missing cases;
-- generate a proof candidate;
-- compare two implementations;
-- interpret a counterexample;
-- propose a safer implementation;
-- decide which verification tool to invoke next.
+- translating an informal requirement into a candidate invariant;
+- explaining why a theorem failed;
+- suggesting missing cases;
+- generating a proof candidate;
+- comparing two implementations;
+- interpreting a counterexample;
+- proposing a safer implementation;
+- deciding which verification tool to invoke next.
 
 Gemini is not the final verifier.
 
@@ -528,8 +464,6 @@ run_python_example
 
 It should not receive arbitrary shell access during the workshop.
 
-A representative loop is:
-
 ```text
 Gemini proposes proof
         ↓
@@ -546,23 +480,13 @@ ADK calls Lean again
 Lean accepts
 ```
 
-### Gemini API function calling
+### Gemini function calling
 
-The architecture naturally maps to Gemini function calling:
-
-1. the application exposes a constrained tool schema;
-2. Gemini selects a tool and supplies arguments;
-3. the application executes the tool;
-4. the result is returned to Gemini;
-5. Gemini decides the next step.
-
-The important security property is that the model proposes the function call, while the application controls what actually executes.
+The application exposes constrained tool schemas. Gemini selects a permitted function and arguments, but the application executes the function. This separation is a central part of the trust model.
 
 ### Agents CLI
 
-Google's Agents CLI is potentially useful on the facilitator/development side for scaffolding an ADK prototype, running a local playground, testing agent traces, and later adding evaluation or deployment support.
-
-It is probably not necessary to teach Agents CLI itself during the 90-minute workshop.
+Agents CLI may be useful for scaffolding and testing the ADK prototype or providing a local playground. It should only appear in the participant path if it demonstrably reduces setup friction.
 
 ---
 
@@ -570,14 +494,12 @@ It is probably not necessary to teach Agents CLI itself during the 90-minute wor
 
 The final 10–12 minutes should contain the most explicit Google demonstration.
 
-### Demo: the agent is allowed to fail
-
 1. Open an incomplete Lean proof in Antigravity.
 2. Ask Gemini to propose and verify a proof.
 3. Gemini produces a plausible but invalid candidate.
 4. The ADK agent invokes the constrained Lean checker.
 5. Lean rejects the candidate.
-6. The compiler feedback is returned to Gemini.
+6. Compiler feedback is returned to Gemini.
 7. Gemini repairs the proof.
 8. ADK invokes Lean again.
 9. Lean accepts the corrected proof.
@@ -586,44 +508,15 @@ The lesson is:
 
 > **The model was useful without being trusted.**
 
-A strong workshop sentence is:
+If time allows, a very short bonus can send the same theorem to Lean Copilot, a small local Lean model, and Gemini. The purpose is not benchmarking. The message is:
 
-> **The agent is allowed to be wrong. The verification boundary is not.**
-
----
-
-## 13. Optional bonus demo: multiple AI systems, one verifier
-
-If time allows, the same theorem can be given to:
-
-```text
-Lean Copilot
-local Kimina
-Gemini
-```
-
-Example result:
-
-```text
-                 candidate        Lean result
-Lean Copilot         A                ✓
-Kimina               B                ✗
-Gemini               C                ✓
-```
-
-The objective is not to rank the models.
-
-The message is:
-
-> Different models may disagree. Lean does not vote.
-
-This demonstrates why generation, orchestration, and verification should remain separate layers.
+> **Different models may disagree. Lean does not vote.**
 
 ---
 
-## 14. Lean Copilot
+## 13. Lean Copilot
 
-Lean Copilot should remain the native Lean helper.
+Lean Copilot remains the native Lean helper.
 
 Useful commands include:
 
@@ -636,101 +529,39 @@ select_premises
 The intended division of labor is:
 
 ```text
-Lean Copilot
-    → small interactive tactic suggestions
-
-Gemini
-    → reasoning, explanation, repair, orchestration
-
-local theorem model
-    → optional alternative proof candidates
-
-Lean
-    → final authority
+Lean Copilot     → small interactive tactic suggestions
+Gemini           → reasoning, explanation, repair, orchestration
+local prover     → optional alternative proof candidates
+Lean             → final authority
 ```
 
-An important limitation is that Lean Copilot's built-in premise retriever uses a fixed snapshot of Lean/mathlib. A project-aware premise index for the exact workshop repository is a possible future research extension, not a first-workshop requirement.
+A project-aware premise index for the exact workshop repository is a possible future extension, not a requirement for the first event.
 
 ---
 
-## 15. LeanDojo-v2
+## 14. LeanDojo-v2 and local theorem models
 
-LeanDojo should be treated as an optional research extension rather than a participant requirement.
+LeanDojo-v2 should remain an optional research extension rather than a participant requirement. Possible uses include proof-state extraction, prover evaluation, custom premise retrieval, and automated proof search.
 
-Possible future uses include:
+Small local theorem-proving models such as Kimina-Prover-RL-0.6B and Kimina-Prover-RL-1.7B are attractive optional demonstrations because the same Lean verifier can check candidates from local and cloud models.
 
-- programmatic Lean interaction;
-- proof-state extraction;
-- training datasets;
-- prover evaluation;
-- custom premise retrieval;
-- automated proof search;
-- integration with local models.
-
-The original LeanDojo library is deprecated for new projects; future work should target LeanDojo-v2.
-
-For the first workshop, the recommended split is:
-
-```text
-Core workshop:
-Lean 4
-Mathlib
-Lean Copilot
-Python
-Antigravity
-Gemini/ADK when credentials are available
-
-Optional advanced track:
-LeanDojo-v2
-local theorem model
-custom premise index
-```
-
-This keeps the participant setup small.
-
----
-
-## 16. Small local theorem-proving models
-
-Local models are useful because the workshop can demonstrate a cloud-independent proof generator and because the same Lean verifier can check candidates from different model families.
-
-The small models discussed so far are:
-
-- **Kimina-Prover-RL-0.6B**;
-- **Kimina-Prover-RL-1.7B**.
-
-These are specialized Lean 4 theorem-proving models rather than general chat models.
-
-The smaller model is appropriate for ordinary participant laptops. The 1.7B model is more appropriate for stronger laptops or the facilitator machine.
-
-A future participant-facing interface could look like:
+A future interface may look like:
 
 ```bash
 ./workshop model download kimina-0.6b
 ./workshop model serve kimina-0.6b
-./workshop model status
+./workshop dojo propose ... --model local
 ```
 
-and later:
-
-```bash
-./workshop dojo propose \
-  playground/current/Current.lean \
-  theorem_name \
-  --model local
-```
-
-This should remain optional for the first workshop.
+None of this should be required during the first 90-minute workshop.
 
 ---
 
-## 17. Aristotle / Harmonic
+## 15. Aristotle / Harmonic
 
-The repository is also designed to remain compatible with Aristotle-style Lean projects.
+The repository should remain compatible with Aristotle-style Lean projects. Aristotle is useful for facilitator preparation, research workflows, larger proof generation or repair, and comparison with other theorem-proving systems.
 
-Aristotle is useful primarily for facilitator preparation, research workflows, larger proof generation/repair, and comparison with other theorem-proving systems.
-
-It is not necessary for every participant.
+It is not necessary for participants.
 
 The broader architecture is intentionally model-agnostic:
 
@@ -739,7 +570,7 @@ Gemini
 Lean Copilot
 Kimina
 Aristotle
-other future models
+future models
         |
         v
 candidate Lean
@@ -750,19 +581,11 @@ same verification boundary
 
 ---
 
-## 18. Repository design and current workflow
+## 16. Repository design and participant workflow
 
-The repository is:
+All repository material is written in English, and the workshop itself will be delivered in English.
 
-```text
-verified-agentic-lean4-workshop
-```
-
-All repository material is written in English.
-
-The project preserves a conventional Lean/Lake structure so that it remains easy to use with Lean, Mathlib, Lean Copilot, Aristotle, and future LeanDojo integration.
-
-The participant command surface is intentionally small.
+The project preserves a conventional Lean/Lake structure so that it remains easy to use with Lean, Mathlib, Lean Copilot, Aristotle, and later LeanDojo integration.
 
 ### Initial setup
 
@@ -792,26 +615,7 @@ The participant command surface is intentionally small.
 ./workshop scenario verify-solutions
 ```
 
-The current scenario is placed under:
-
-```text
-playground/current/
-```
-
-Before replacing current work, the loader creates a backup under:
-
-```text
-playground/backups/
-```
-
-The first workshop contains four scenario families:
-
-```text
-lifecycle
-bt
-vda
-uncertainty
-```
+The current scenario is placed under `playground/current/`. Before replacing current work, the loader creates a sanitized backup under `playground/backups/`.
 
 For each scenario the repository contains an unsolved Lean exercise, unsolved Python exercise, shared Lean model, reference Lean proof, and reference Python implementation.
 
@@ -827,21 +631,13 @@ Lean:
 
 ---
 
-## 19. Trust boundary in the repository
+## 17. Verification and trust boundary in the repository
 
-The repository intentionally rejects common proof bypasses such as:
+The repository deliberately rejects common proof bypasses and unchecked assumptions, including direct uses of constructs such as `sorry`, `admit`, `axiom`, `constant`, `sorryAx`, `native_decide`, and `implemented_by` in participant proof code.
 
-```text
-sorry
-admit
-new axioms
-native_decide
-implemented_by
-```
+Comments and strings are not treated as executable Lean code by the static guard. The actual Lean file is then compiled with the pinned toolchain.
 
-The active Lean file is then compiled.
-
-The Google ADK agent should follow the same rule:
+The Google ADK agent follows the same rule:
 
 ```text
 agent-generated text != verified proof
@@ -849,19 +645,15 @@ agent-generated text != verified proof
 
 The agent may only report success after the actual Lean checker succeeds.
 
-This principle should appear explicitly in the README, agent instructions, live workshop, and organizer description.
+This static scan is a workshop guard, not a replacement for Lean's parser or kernel. The kernel remains the final proof authority.
 
 ---
 
-## 20. No GitHub Actions
+## 18. No GitHub Actions
 
 GitHub Actions are intentionally not part of this project.
 
-Validation is local.
-
-This avoids hosted CI cost and is educationally useful because participants can see the complete verification process on their own machines.
-
-The local acceptance command is:
+Validation is local. This avoids hosted CI cost and is educationally useful because participants can see the complete verification process on their own machines.
 
 ```bash
 ./workshop check
@@ -871,43 +663,7 @@ Development and release preparation rely on local shell checks, Python tests, Le
 
 ---
 
-## 21. Current development status
-
-The current private repository already contains a substantial first implementation.
-
-The active draft pull request includes:
-
-- the four scenarios;
-- Python and Lean versions;
-- reference solutions;
-- participant and facilitator guides;
-- a live-demo script;
-- an optional constrained Google ADK agent;
-- local trust-boundary checks;
-- automatic participant backups;
-- local regression tests.
-
-Current local non-Lean validation includes passing scenario and workflow regression tests.
-
-The major remaining native acceptance step is:
-
-```text
-full Lean build
-+
-Lean Copilot model download
-+
-lockfile generation
-+
-clean-clone validation
-```
-
-on the reference machine.
-
-The repository should remain private until the workshop structure and organizer requirements are settled.
-
----
-
-## 22. Participant setup philosophy
+## 19. Participant setup philosophy
 
 The workshop should minimize setup friction.
 
@@ -918,7 +674,6 @@ The intended experience is:
 ```bash
 git clone ...
 cd verified-agentic-lean4-workshop
-
 ./workshop setup
 ./workshop check
 ```
@@ -929,15 +684,13 @@ then:
 ./workshop scenario start lifecycle
 ```
 
-Preferred environments are Linux, macOS, and Windows through WSL 2, with an editor that supports Lean 4 and Google Antigravity IDE for the agentic portion.
+Preferred environments are Linux, macOS, and Windows through WSL 2, with Lean 4 editor support and Antigravity evaluated for the agentic portion.
 
-Core dependencies are Git, Git LFS, Lean via `elan`, Python 3.11/3.12, and `uv`.
-
-Optional components include Kimina, LeanDojo-v2, Gemini API credentials, and Aristotle credentials.
+Optional components must remain optional.
 
 ---
 
-## 23. Internet and offline fallback
+## 20. Internet and offline fallback
 
 The workshop should not depend on perfect conference Wi-Fi.
 
@@ -947,9 +700,7 @@ Before the event, prepare offline copies of:
 - Mathlib cache;
 - Lean Copilot model cache;
 - Python wheels;
-- optional Kimina model.
-
-The core lifecycle and BT exercises should work even when Gemini is unavailable.
+- optional local theorem model.
 
 Graceful degradation should look like:
 
@@ -967,129 +718,317 @@ No Internet:
 pre-cached local environment
 ```
 
-This is important for a live event.
-
 ---
 
-## 24. Gemini API credentials and event support
+## 21. Gemini credentials and event support
 
-This is one of the main topics to discuss with the organizers.
+The workshop should avoid requiring every participant to enter a credit card, manually create a cloud project during the session, copy long-lived secrets into source files, or expose API keys.
 
-The workshop should avoid requiring every participant to enter a credit card, manually create a cloud project during the session, copy long-lived secrets into source files, or expose API keys to other participants.
+Preferred possibilities are:
 
-Preferred possibilities:
-
-### Option A — event-provided credits / credentials
-
-The organizers provide an approved way for participants to access Gemini during the event.
-
-### Option B — participants use their own Google accounts
-
-This may work if the audience is already expected to have access to the required developer tooling. The onboarding flow should be tested in advance.
-
-### Option C — facilitator-only cloud demo
-
-If participant credentials are too difficult, the main exercises remain local and the Gemini + ADK loop is demonstrated by the facilitator.
+1. **event-provided Gemini access or credits**;
+2. **participant Google accounts with a tested onboarding flow**;
+3. **facilitator-only cloud demo** if participant authentication is too costly in workshop time.
 
 No secret should ever be committed to the repository. Local configuration should use environment variables or an ignored `.env` file.
 
 ---
 
-## 25. Questions for organizers
+## 22. Questions for organizers
 
-### Technology and program requirements
+### Google technology requirements
 
 1. Is **Antigravity + Gemini + ADK** sufficient to satisfy the Google-technology requirement?
 2. Is there a preference for Gemini API versus Vertex AI access?
-3. Are organizers interested in showcasing Agents CLI as well?
-4. Should a Google Cloud deployment component be included, or is local agent orchestration preferable for 90 minutes?
+3. Is Agents CLI expected or merely optional?
+4. Is a Google Cloud deployment element expected, or is a local ADK agent sufficient?
 
 ### Credentials and credits
 
 5. Can the event provide Gemini API credits or another approved access path?
-6. Can participants receive temporary or event-scoped credentials?
+6. Can participants receive temporary/event-scoped credentials?
 7. Is there an existing DevFest/Google developer-credit process we should use?
 8. What is the expected policy for participant API keys?
 
-### Participant machines
+### Participant environment
 
-9. Will participants be expected to bring laptops?
-10. Which operating systems should we officially support?
-11. Can we send a pre-event setup checklist?
-12. Can we ask participants to run a setup test before arrival?
+9. Will participants bring laptops?
+10. Which operating systems should be officially supported?
+11. Can pre-event setup instructions be sent?
+12. Can participants be asked to run a setup test before arrival?
 
-### Network
+### Network and logistics
 
 13. How reliable is conference Wi-Fi expected to be?
 14. Can the facilitator machine host a small local service if needed?
 15. Are there firewall restrictions on local HTTP endpoints?
+16. What is the expected participant count?
+17. Is 90 minutes fixed?
+18. Can participants work in pairs if useful?
 
-### Workshop format
+---
 
-16. What technical level is expected?
-17. Is the 90-minute duration fixed?
-18. What is the expected number of participants?
-19. Can we recommend working in pairs?
-20. Can the workshop listing state that setup should be completed before arrival?
+## 23. Targeted Google-tooling support: role of Adrian Romański
+
+Adrian's role is **targeted Google-tooling support and technical consultation**, not co-ownership of the workshop.
+
+The presenter remains responsible for:
+
+- the workshop concept and narrative;
+- all robotics examples;
+- Lean specifications and proofs;
+- Python examples;
+- repository implementation;
+- participant setup;
+- ADK integration implementation;
+- demonstrations;
+- testing and rehearsal;
+- final presentation and delivery.
+
+Adrian can be especially helpful as a specialist sounding board for questions such as:
+
+- whether Antigravity is practical as a participant environment;
+- which current Google agent tooling gives the lowest-friction path;
+- how ADK should be structured for this small local application;
+- how participants should authenticate to Gemini;
+- whether the ADK playground is sufficient or a custom UI is justified;
+- frontend/developer-experience pitfalls that are easy to miss;
+- whether Nix or another reproducibility mechanism would materially help or merely increase complexity.
+
+The desired interaction is therefore:
+
+```text
+presenter prepares architecture / prototype / questions
+        ↓
+Adrian reviews Google-specific choices and developer experience
+        ↓
+presenter decides and implements
+```
+
+---
+
+## 24. Questions to ask Adrian
+
+The highest-value questions are deliberately narrow and Google/tooling-oriented.
+
+### Antigravity
+
+1. Would you make Antigravity required, recommended, or facilitator-only for a 90-minute workshop?
+2. What is the realistic first-run setup time for participants who have never used it?
+3. Are there platform limitations that could make it unreliable on Windows/WSL, macOS, or Linux?
+4. What is the simplest way to give Antigravity enough context about the repository and trust rules without building custom integration?
+5. Is there an obvious feature of Antigravity we should exploit for the final “proposal → verifier → repair” demo?
+
+### ADK and Gemini
+
+6. Is a small ADK application with constrained Python tools the right architecture, or is there a simpler Google-native mechanism for this use case?
+7. Should the ADK agent live inside the same repository or in a separate minimal subproject?
+8. What is the cleanest way to expose `check_lean`, `run_python`, and `read_goal` as tools?
+9. How should we surface tool calls and verifier output so participants can see that Gemini does not certify itself?
+10. What failure modes should we expect from ADK during a live workshop?
+11. Should we use the Gemini API directly or Vertex AI for an event like this?
+12. Which authentication route creates the least participant friction?
+13. Can one preconfigured local setup hide most of the ADK/Gemini plumbing?
+14. Is Agents CLI useful enough here to justify adding another command-line dependency?
+
+### UI and developer experience
+
+15. Is the existing ADK/Google playground sufficient for the final demonstration?
+16. Would a tiny custom frontend materially improve the educational value, or would it only add maintenance risk?
+17. If we build a visualization, what is the minimum useful view for the agent trace?
+18. What would you remove from the current UX to make it more reliable for 20–50 participants?
+
+### Reproducibility
+
+19. Would Nix materially improve participant setup for this stack, or is it more likely to create onboarding friction?
+20. Is there a lightweight reproducibility trick from Angular/Nix/frontend projects that would help us detect broken participant environments early?
+
+The single most useful challenge question is:
+
+> **If you had to make the Google part work reliably for 30 developers who had never used ADK before, with at most 10–15 minutes of setup budget, what would you keep, hide, or remove?**
+
+---
+
+## 25. FAQ for organizer and Google-tooling discussions
+
+### Is this primarily a Lean workshop?
+
+No. Lean is the independent verifier, but the broader subject is trustworthy agentic software development. Participants should understand the architecture even if they do not continue using Lean afterwards.
+
+### Why robotics?
+
+Robotics gives concrete examples where software state has physical consequences. Lifecycle resources, behavior refactoring, industrial protocols, and uncertainty-aware planning are understandable software problems with meaningful correctness requirements.
+
+### Why use Google technologies?
+
+They form the agentic layer rather than being added for branding. Antigravity provides the developer environment, Gemini proposes and repairs, and ADK controls tool use. Lean deliberately remains outside that trust boundary.
+
+### Does Gemini execute Lean directly?
+
+No. Gemini proposes a permitted tool call. The application/ADK layer executes the verifier. This distinction is central to the demo.
+
+### Why not simply ask Gemini whether its solution is correct?
+
+Because confidence or explanation is not a certificate. The point of the workshop is that a strong generative model can still benefit from an independent verifier.
+
+### What happens when Gemini generates an invalid proof?
+
+That is an expected and useful event. ADK sends the candidate to Lean, Lean rejects it, the compiler feedback is returned to Gemini, and Gemini can attempt a repair.
+
+### What tools should the ADK agent receive?
+
+A small allowlist such as `read_file`, `read_goal`, `check_lean`, and `run_python_example`. It should not need arbitrary shell access.
+
+### Do participants need to learn ADK?
+
+Not in depth. They should understand what it does and observe the tool loop. The implementation should be available for inspection, but ADK internals should not consume a large part of the 90 minutes.
+
+### Do we need a custom frontend?
+
+Probably not unless it adds a specific educational benefit. Existing Antigravity/ADK interfaces should be evaluated first. A custom UI is justified only if it clearly visualizes the verification trace better.
+
+### What would a useful trace visualization show?
+
+Something as simple as:
+
+```text
+1. Gemini proposed candidate
+2. ADK called check_lean
+3. Lean returned error
+4. Gemini proposed repair
+5. ADK called check_lean
+6. Lean returned verified
+```
+
+### Why is Python included if Lean is the verifier?
+
+Python answers “what happens for this concrete execution?” Lean answers “does the property hold for all states/traces represented by the model?” The combination makes formal verification easier to teach.
+
+### Why is lifecycle/resource handling the first exercise?
+
+Because it is familiar, realistic, and deceptively simple. A node can enter `Inactive` while still holding resources or actuator authority. That makes a strong first invariant example.
+
+### Why is Behavior Tree refinement the main exercise?
+
+Because it introduces a deeper engineering question without requiring advanced mathematics: what does it mean for a rewrite to preserve behavior?
+
+### Is the VDA example a standards certification tool?
+
+No. It is explicitly a VDA 5050-inspired teaching profile. Its purpose is to show that individually valid messages can form an invalid temporal trace.
+
+### Why include uncertainty?
+
+To show that formalization is not limited to state machines. A tiny set-valued perception/planner contract introduces the logical structure behind robust planning and uncertainty sets.
+
+### Will participants need Gemini API keys?
+
+This remains an organizer decision. Event-provided access is preferred. If participant authentication is too costly, the core workshop remains local and the Gemini/ADK loop can be facilitator-led.
+
+### What happens if Wi-Fi fails?
+
+The lifecycle and BT exercises still run locally. Mathlib, Lean Copilot models, Python dependencies, and optional model artifacts should be cached before the event. The cloud-dependent final demo needs a fallback trace or facilitator-prepared path.
+
+### Are local models part of the core workshop?
+
+No. A small Lean model is an optional bonus demonstration showing that different candidate generators can use the same verifier.
+
+### Is LeanDojo required?
+
+No. LeanDojo-v2 is an advanced extension for programmatic proof interaction and prover research. It should not increase participant setup time for the first workshop.
+
+### Is cloud deployment part of the workshop?
+
+Not unless the organizers explicitly require it. Local orchestration is enough to teach the agent architecture and is more reliable in 90 minutes.
+
+### Is Nix required?
+
+No. It is worth discussing as a reproducibility option, especially with Adrian, but it should only be introduced if it reduces net setup friction across the target operating systems.
+
+### Who is responsible for implementing the workshop?
+
+The presenter. Adrian and the organizers provide targeted feedback/support, especially around Google tooling, event logistics, credentials, and participant experience.
+
+### What is the minimum viable Google integration?
+
+```text
+Antigravity
+    ↓
+Gemini
+    ↓
+ADK tool call
+    ↓
+check_lean(candidate)
+    ↓
+Lean result
+    ↓
+Gemini explanation / repair
+```
+
+This is already genuinely Google-centric and demonstrates the central trust boundary.
+
+### What is the success criterion for the final demo?
+
+Participants should clearly see that:
+
+1. Gemini generated a candidate;
+2. Gemini did not certify it;
+3. ADK invoked an external verifier;
+4. Lean accepted or rejected the candidate;
+5. verifier feedback could guide the next AI attempt.
+
+### What should implementation decisions optimize for?
+
+In order:
+
+1. reliability during the live event;
+2. conceptual clarity;
+3. participant setup time;
+4. useful hands-on interaction;
+5. technical depth;
+6. optional sophistication.
+
+### What should we explicitly avoid?
+
+- complex participant cloud-project setup during the session;
+- mandatory LeanDojo installation;
+- unrestricted shell access for the agent;
+- an opaque “AI succeeded” message without verifier output;
+- a custom frontend built only for visual polish;
+- cloud infrastructure added only to increase the number of Google products;
+- another full exercise;
+- dependence on perfect conference Wi-Fi;
+- presenting the educational VDA monitor as full certification.
+
+The implementation guideline is:
+
+> **Make it easy for the AI to propose, easy for the participant to understand what happened, and impossible for the AI to declare itself verified.**
 
 ---
 
 ## 26. What should remain outside the first 90 minutes
 
-Several ideas are interesting but would overload the first workshop.
+Interesting but out-of-scope topics include:
 
-### Semantic maps
+- semantic-map verification;
+- full VDA 5050 formalization;
+- full ROS 2 runtime models;
+- advanced MPC/Control Barrier Function proofs;
+- continuous-time dynamics;
+- full conformal-prediction pipelines;
+- LeanDojo training workflows;
+- project-specific theorem-prover training;
+- mandatory local model serving;
+- cloud deployment exercises.
 
-Formal verification of semantic maps is promising for well-formed topology, routing-graph refinement, affordance constraints, map-version migration, and planner-map consistency. However, it requires too much domain modeling for the first session.
-
-### Full MPC / control-theoretic verification
-
-Lyapunov proofs, MPC feasibility, Control Barrier Functions, and continuous dynamics would be technically strong but would move attention away from the agentic-verification workflow.
-
-### Full VDA 5050 formalization
-
-The current VDA demonstration should remain intentionally small. A full version belongs in a separate project.
-
-### Full LeanDojo participant setup
-
-LeanDojo-v2 is valuable, but installation and model tooling can consume too much workshop time.
-
-### Full conformal-prediction pipeline
-
-The uncertainty demo can mention conformal prediction, but the first workshop should not require participants to learn it.
+These are potential follow-up workshop or research directions.
 
 ---
 
-## 27. Possible future advanced workshop
-
-A follow-up workshop could be titled:
-
-# Verified AI for Cyber-Physical Systems
-
-Possible topics:
-
-- formal ROS 2 lifecycle contracts;
-- Behavior Tree refinement;
-- distributed robot-state consistency;
-- VDA 5050 versioned conformance;
-- semantic-map invariants;
-- conformal prediction contracts;
-- planner/controller contracts;
-- MPC/CBF fallback supervisors;
-- LeanDojo-v2;
-- project-specific premise retrieval;
-- local theorem-proving models;
-- agent evaluation.
-
-This would connect the lightweight first workshop to serious research in trustworthy robotics.
-
----
-
-## 28. Connection to cyber-physical systems
+## 27. Connection to cyber-physical systems
 
 Robotic software sits at the boundary between digital state, communication, timing, physical resources, physical motion, and human interaction.
 
-The strongest early formalization targets are often the interfaces rather than the continuous dynamics themselves:
+The strongest early formalization targets are often the interfaces:
 
 ```text
 May the controller issue this command?
@@ -1104,11 +1043,11 @@ Does the planner account for the full uncertainty set?
 
 These contracts are small enough to formalize but important enough to matter.
 
-The same methodology can later apply to medical robots, infusion pumps, rehabilitation robots, industrial cobots, laboratory automation, and autonomous logistics, without adding separate medical exercises to the first workshop.
+The same methodology can later apply to medical robots, rehabilitation systems, industrial cobots, laboratory automation, autonomous logistics, and other safety-critical cyber-physical systems.
 
 ---
 
-## 29. Core architecture
+## 28. Core architecture
 
 ```text
                     +----------------------+
@@ -1145,17 +1084,17 @@ Optional alternative candidate generators—Lean Copilot, Kimina, Aristotle, and
 
 ---
 
-## 30. Why this fits a Google developer event
+## 29. Why this fits a Google developer event
 
-The workshop can showcase Google technology in a way that is more meaningful than simply calling a Gemini endpoint.
+The workshop showcases Google technology in a way that is more meaningful than simply calling a Gemini endpoint.
 
 It demonstrates:
 
-- **Antigravity:** an agentic developer environment working on a real codebase;
+- **Antigravity:** an agentic developer environment operating on a real checked codebase;
 - **Gemini:** reasoning over requirements, invariants, counterexamples, and proof failures;
 - **ADK:** controlled orchestration and tool use;
-- **Gemini function calling:** the model selects tools while the application retains execution authority;
-- **responsible agent architecture:** the AI is powerful but does not get unlimited trust or arbitrary shell access.
+- **Gemini function calling:** structured model-selected tool invocation while execution remains application-controlled;
+- **responsible agent architecture:** the AI is powerful but does not receive unlimited trust.
 
 A useful overall message is:
 
@@ -1163,18 +1102,18 @@ A useful overall message is:
 
 ---
 
-## 31. Workshop “aha” moments
+## 30. Workshop “aha” moments
 
-1. **A boring lifecycle bug becomes a theorem.** A forgotten resource release invalidates an invariant.
+1. **A mundane lifecycle bug becomes a theorem.** A forgotten resource release invalidates an invariant.
 2. **The rewrite is not equivalent.** The Behavior Tree and handwritten FSM disagree on a small but important case.
-3. **Valid messages can form an invalid protocol.** JSON validity is not temporal conformance.
-4. **The point estimate was misleading.** A safe-looking obstacle estimate becomes unsafe once uncertainty is represented.
-5. **Gemini gives a wrong proof.** That is not a failure of the workshop; it is the point. ADK sends the candidate to Lean, Lean rejects it, and Gemini gets feedback.
+3. **Valid messages can form an invalid protocol.** Structural validity is not temporal conformance.
+4. **The point estimate was misleading.** An apparently safe obstacle estimate becomes unsafe once uncertainty is represented.
+5. **Gemini gives a wrong proof.** That is not a failure of the workshop; it is the point.
 6. **Two AI models disagree.** The verifier remains unchanged.
 
 ---
 
-## 32. Suggested opening narrative
+## 31. Suggested opening narrative
 
 > We increasingly let AI agents write and modify software. That is useful, but robotics gives us an uncomfortable question: what happens when plausible-looking generated code controls a physical machine?
 >
@@ -1186,7 +1125,7 @@ A useful overall message is:
 
 ---
 
-## 33. Suggested closing narrative
+## 32. Suggested closing narrative
 
 > We started with a lifecycle node forgetting to release a resource. We then checked whether a Behavior Tree refactor preserved behavior, looked at temporal conformance of industrial-style messages, and finished with a planner reasoning over an uncertainty set.
 >
@@ -1198,7 +1137,7 @@ A useful overall message is:
 
 ---
 
-## 34. Organizer decisions needed before finalizing the workshop
+## 33. Organizer decisions needed before finalizing the workshop
 
 The main decisions are:
 
@@ -1215,12 +1154,12 @@ The main decisions are:
 
 ---
 
-## 35. Recommended scope for version 1
+## 34. Recommended scope for version 1
 
 ### Must have
 
 - English repository and presentation;
-- Antigravity in the workflow;
+- Antigravity incorporated into the Google workflow;
 - Gemini as the reasoning/repair model;
 - ADK as constrained tool orchestrator;
 - Lean 4 as verifier;
@@ -1253,28 +1192,27 @@ The main decisions are:
 
 ---
 
-## 36. Immediate next technical work
+## 35. Immediate next technical work
 
 Before presenting the workshop plan as final, the repository should go through the following sequence:
 
-1. run the complete native Lean build on the reference machine;
-2. validate Lean Copilot with the pinned Lean/Mathlib version;
-3. generate and review reproducibility lockfiles;
-4. test the complete setup from a clean clone;
-5. implement the Gemini backend;
-6. connect the Gemini backend to the constrained ADK Lean tools;
-7. test an intentional “wrong proof → compiler feedback → repaired proof” demo;
-8. test Antigravity with the exact participant repository;
-9. decide whether to add the optional Kimina path before the event;
-10. prepare an offline workshop bundle;
-11. perform a full 90-minute rehearsal;
-12. shorten any segment that regularly exceeds its timebox.
+1. resolve correctness/security findings from PR review;
+2. run the complete native Lean build on the reference machine;
+3. validate Lean Copilot with the pinned Lean/Mathlib version;
+4. generate and review reproducibility lockfiles;
+5. test the complete setup from a clean clone;
+6. implement the Gemini backend;
+7. connect the Gemini backend to the constrained ADK Lean tools;
+8. test an intentional “wrong proof → compiler feedback → repaired proof” demo;
+9. test Antigravity with the exact participant repository;
+10. decide whether to add the optional Kimina path before the event;
+11. prepare an offline workshop bundle;
+12. perform a full 90-minute rehearsal;
+13. shorten any segment that regularly exceeds its timebox.
 
 ---
 
-## 37. Proposed framing for the organizers
-
-A useful way to frame the workshop is:
+## 36. Proposed framing for organizers
 
 > This is not intended to be a Lean workshop with Gemini added for branding. The Google technologies are the agentic layer of the system.
 >
@@ -1282,10 +1220,8 @@ A useful way to frame the workshop is:
 >
 > The central demonstration is therefore a trustworthy agent loop rather than a chatbot demo.
 
-This distinction should make the workshop a stronger fit for a Google developer event.
-
 ---
 
-## 38. Final one-paragraph concept
+## 37. Final one-paragraph concept
 
 **From Hallucination to Proof** is a 90-minute hands-on workshop about building AI agents that are useful without requiring blind trust. Participants use Google Antigravity, Gemini, and Google Agent Development Kit to analyze and modify small robotics programs, while Python provides executable counterexamples and Lean 4 provides formal verification. The core exercises cover ROS 2-style lifecycle/resource invariants and Behavior Tree-to-FSM refinement, followed by short demonstrations of VDA 5050-style temporal conformance and perception-planning under uncertainty. The final demo closes the loop: Gemini proposes a proof, ADK invokes a constrained Lean checker, Lean rejects an incorrect candidate, and Gemini repairs it using compiler feedback. The message is simple: **AI can propose; the verifier decides.**

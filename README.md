@@ -7,8 +7,8 @@ AI-assisted formalization of robotics software. Language models may plan,
 propose, explain, falsify, and repair. Lean 4 is the independent verification
 authority.
 
-The live workshop will be delivered in Polish. All repository content, code,
-and participant-facing technical material is written in English.
+The live workshop, repository content, code, and participant-facing technical
+material are all written and delivered in English.
 
 ## Core principle
 

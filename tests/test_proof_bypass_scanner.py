@@ -29,23 +29,34 @@ def run_scanner(
     )
 
 
-def test_scanner_distinguishes_prose_from_proof_hole(tmp_path: Path) -> None:
+def test_scanner_distinguishes_prose_from_proof_holes(tmp_path: Path) -> None:
     scanner = prepare_scanner(tmp_path)
 
     valid = tmp_path / "Valid.lean"
     valid.write_text(
-        "-- Do not use `sorry` in this exercise.\n"
+        "-- Do not use `sorry`, `axiom`, or `constant` in this exercise.\n"
+        "/- Nested comment mentioning sorry. /- constant x : False -/ -/\n"
+        '#eval "sorry is text here"\n'
         "example : True := by trivial\n",
         encoding="utf-8",
     )
     accepted = run_scanner(tmp_path, scanner, valid)
     assert accepted.returncode == 0
 
-    invalid = tmp_path / "Invalid.lean"
-    invalid.write_text("example : True := by sorry\n", encoding="utf-8")
-    rejected = run_scanner(tmp_path, scanner, invalid)
-    assert rejected.returncode != 0
-    assert "forbidden Lean proof bypass" in rejected.stderr
+    forbidden_sources = {
+        "ParenSorry.lean": "example : True := (by sorry)\n",
+        "SorryAx.lean": "example : False := Lean.sorryAx False true\n",
+        "Constant.lean": "constant fabricated : False\n",
+        "Axiom.lean": "axiom fabricated : False\n",
+        "NativeDecide.lean": "example : True := by native_decide\n",
+    }
+
+    for filename, source in forbidden_sources.items():
+        invalid = tmp_path / filename
+        invalid.write_text(source, encoding="utf-8")
+        rejected = run_scanner(tmp_path, scanner, invalid)
+        assert rejected.returncode != 0, filename
+        assert "forbidden Lean proof bypass" in rejected.stderr
 
 
 def test_default_scan_ignores_local_backups(tmp_path: Path) -> None:

@@ -36,12 +36,14 @@ inductive Event where
 The workshop invariant:
 
 * an active node owns its sensor and log resources;
-* an enabled actuator implies an active node;
+* sensor, log, and actuator resources are owned only while active;
 * unconfigured and finalized nodes own no runtime resource.
 -/
 def Safe (state : State) : Prop :=
   (state.mode = .active →
     state.sensorOpen = true ∧ state.logOpen = true) ∧
+  (state.sensorOpen = true → state.mode = .active) ∧
+  (state.logOpen = true → state.mode = .active) ∧
   (state.actuatorEnabled = true → state.mode = .active) ∧
   ((state.mode = .unconfigured ∨ state.mode = .finalized) →
     state.sensorOpen = false ∧

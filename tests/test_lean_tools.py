@@ -28,34 +28,81 @@ def test_non_lean_file_is_rejected() -> None:
     assert result["status"] == "error"
 
 
-def test_forbidden_construct_is_reported(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def _scan_source(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    filename: str,
+    source: str,
+) -> dict[str, object]:
     allowed = tmp_path / "playground"
-    allowed.mkdir()
-    bad = allowed / "Bad.lean"
-    bad.write_text("example : True := by sorry\n", encoding="utf-8")
+    allowed.mkdir(exist_ok=True)
+    target = allowed / filename
+    target.write_text(source, encoding="utf-8")
 
     monkeypatch.setattr(lean, "_REPOSITORY_ROOT", tmp_path)
     monkeypatch.setattr(lean, "_ALLOWED_ROOTS", (allowed,))
+    return lean.scan_lean_file(f"playground/{filename}")
 
-    result = lean.scan_lean_file("playground/Bad.lean")
+
+def test_forbidden_construct_is_reported(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    result = _scan_source(
+        tmp_path,
+        monkeypatch,
+        "Bad.lean",
+        "example : True := (by sorry)\n",
+    )
     assert result["status"] == "rejected"
-    assert result["matches"] == [{"line": 1, "text": "example : True := by sorry"}]
+    assert result["matches"] == [
+        {"line": 1, "text": "example : True := (by sorry)"}
+    ]
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        "constant fabricated : False\n",
+        "axiom fabricated : False\n",
+        "example : False := Lean.sorryAx False true\n",
+        "example : True := by native_decide\n",
+    ],
+)
+def test_axiom_aliases_and_trust_bypasses_are_rejected(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, source: str
+) -> None:
+    result = _scan_source(tmp_path, monkeypatch, "Bad.lean", source)
+    assert result["status"] == "rejected"
+
+
+def test_comments_and_strings_do_not_trigger_static_scan(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    result = _scan_source(
+        tmp_path,
+        monkeypatch,
+        "Clean.lean",
+        "-- Do not use `sorry` or `constant`.\n"
+        "/- A block comment mentioning axiom and sorryAx. -/\n"
+        '#eval "sorry is only a string"\n'
+        "example : True := by trivial\n",
+    )
+    assert result == {
+        "status": "success",
+        "path": "playground/Clean.lean",
+        "matches": [],
+    }
 
 
 def test_clean_file_passes_static_scan(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    allowed = tmp_path / "playground"
-    allowed.mkdir()
-    clean = allowed / "Clean.lean"
-    clean.write_text("example : True := by trivial\n", encoding="utf-8")
-
-    monkeypatch.setattr(lean, "_REPOSITORY_ROOT", tmp_path)
-    monkeypatch.setattr(lean, "_ALLOWED_ROOTS", (allowed,))
-
-    result = lean.scan_lean_file("playground/Clean.lean")
+    result = _scan_source(
+        tmp_path,
+        monkeypatch,
+        "Clean.lean",
+        "example : True := by trivial\n",
+    )
     assert result == {
         "status": "success",
         "path": "playground/Clean.lean",

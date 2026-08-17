@@ -35,16 +35,24 @@ ACTIVE_STATE = State(Mode.ACTIVE, True, True, True)
 
 
 def safe(state: State) -> bool:
-    active_resources = state.mode is not Mode.ACTIVE or (
+    active_has_resources = state.mode is not Mode.ACTIVE or (
         state.sensor_open and state.log_open
     )
+    sensor_guard = not state.sensor_open or state.mode is Mode.ACTIVE
+    log_guard = not state.log_open or state.mode is Mode.ACTIVE
     actuator_guard = not state.actuator_enabled or state.mode is Mode.ACTIVE
     terminal_cleanup = state.mode not in {Mode.UNCONFIGURED, Mode.FINALIZED} or (
         not state.sensor_open
         and not state.log_open
         and not state.actuator_enabled
     )
-    return active_resources and actuator_guard and terminal_cleanup
+    return (
+        active_has_resources
+        and sensor_guard
+        and log_guard
+        and actuator_guard
+        and terminal_cleanup
+    )
 
 
 def buggy_step(state: State, event: Event) -> State:
@@ -110,8 +118,10 @@ def preservation_holds() -> bool:
 
 def main() -> None:
     nominal_trace = [Event.CONFIGURE, Event.ACTIVATE, Event.DEACTIVATE, Event.CLEANUP]
+    inactive_with_open_resources = State(Mode.INACTIVE, True, True, False)
     assert safe(INITIAL)
     assert safe(ACTIVE_STATE)
+    assert not safe(inactive_with_open_resources)
     assert not safe(buggy_step(ACTIVE_STATE, Event.DEACTIVATE))
     assert preservation_holds()
     assert safe(run(INITIAL, nominal_trace))

@@ -1,159 +1,43 @@
-# From Hallucination to Proof
+# From Hallucination to Proof — Reference Solutions
 
-**Trustworthy AI-assisted robotics development with Gemini and Lean 4**
+**Facilitator and post-workshop overlay for the verified robotics workshop.**
 
-This repository is the participant-facing working version of a 90-minute
-hands-on workshop on AI-assisted formal verification for robotics software.
-Language models may propose, explain, falsify, and repair. Lean 4 is the
-independent verification authority.
+This branch is built directly on top of the current participant branch and adds
+completed Lean proofs, completed Python implementations, task-level solution
+notes, and facilitator demo notes.
 
-The live workshop, repository content, code, and participant-facing technical
-material are all in English.
+Start with:
 
-## Core principle
+**[`REFERENCE_SOLUTIONS.md`](REFERENCE_SOLUTIONS.md)**
 
-```text
-model proposal != proof
-
-proposal -> executable check -> Lean compilation -> verified or rejected
-```
-
-## Start here
-
-Before the event:
+## Validate this branch
 
 ```bash
 ./workshop setup
 ./workshop check
+./workshop scenario verify-solutions
 ```
 
-Then follow the numbered participant curriculum:
-
-**[`curriculum/README.md`](curriculum/README.md)**
-
-The curriculum contains one folder per stage and one subfolder per concrete
-task or demo step, with exact commands, expected observations, non-spoiling
-hints, completion criteria, and recovery instructions.
-
-## Workshop path
-
-The 90-minute version contains two participant exercises and three short guided
-segments:
-
-1. ROS 2-style lifecycle + sensor + log + actuator resources;
-2. Behavior Tree to handwritten FSM refinement;
-3. VDA 5050-inspired temporal-conformance demo;
-4. perception-planner contract under uncertainty demo;
-5. Gemini-assisted proposal/rejection/repair demo, when the tested integration
-   is available, with a deterministic local fallback.
-
-Available starter scenarios are:
+Then validate each loaded answer:
 
 ```bash
-./workshop scenario list
-./workshop scenario start lifecycle
-./workshop scenario start bt
-./workshop scenario start vda
-./workshop scenario start uncertainty
+for scenario in lifecycle bt vda uncertainty; do
+  ./workshop scenario solution "$scenario"
+  ./workshop scenario check
+done
 ```
 
-The active files are:
+## Branch discipline
 
-```text
-playground/current/Current.lean
-playground/current/current.py
-```
+Shared workshop changes belong on `agent/initial-workshop-platform` first. Keep
+this branch as a small answer overlay so reference proofs cannot silently drift
+from participant models and instructions.
 
-Check exactly that pair with:
+Do not use this branch as the live participant checkout. Prefer a separate Git
+worktree for facilitator preparation and demos.
 
-```bash
-./workshop scenario check
-```
+A Git branch is not access control. If the main repository is published before
+the event and answers must remain hidden, keep this overlay private/unpublished
+until the workshop ends.
 
-Participant work is automatically backed up under `playground/backups/` before
-another starter replaces it.
-
-## Reference solutions are intentionally absent
-
-The participant branch contains no completed Lean proofs or Python reference
-implementations and provides no `scenario solution` command.
-
-Reference answers are maintained separately for facilitator preparation and
-post-workshop study. A separate Git branch prevents accidental spoilers but is
-not access control: if this repository is made public before the event, the
-reference branch should remain unpublished/private until the workshop ends.
-
-## Lean Copilot
-
-The project pins Lean 4.28, Mathlib 4.28, and Lean Copilot 4.28. In an exercise,
-participants may try commands such as:
-
-```lean
-suggest_tactics
-search_proof
-select_premises
-```
-
-A generated suggestion is still only a candidate until the exact file compiles.
-
-## Optional Google agent layer
-
-The repository contains a constrained Google ADK/Gemini prototype for the final
-agentic-verification demonstration. It is optional and remains separate from
-the Lean-only participant path while integration is being finalized.
-
-The intended boundary is:
-
-```text
-Gemini proposal
-    -> constrained tool call
-    -> Lean checker
-    -> verifier feedback
-    -> repair
-```
-
-The agent receives no arbitrary shell tool and must not report a proof as
-verified unless the actual Lean checker succeeds.
-
-## Lean-only setup
-
-```bash
-./workshop setup --lean-only
-./workshop check --lean-only
-```
-
-For a fast environment test without downloading Lean Copilot model weights:
-
-```bash
-./workshop setup --lean-only --skip-models
-```
-
-## Local acceptance gate
-
-GitHub Actions are intentionally disabled. Repository validation is local:
-
-```bash
-./workshop check
-```
-
-This checks the no-Actions policy, Bash syntax, forbidden Lean constructs, the
-Lean build and committed playground, Ruff, mypy, and pytest.
-
-## Repository map
-
-```text
-curriculum/                 numbered participant steps and demo runbooks
-VerifiedAgenticWorkshop/    shared checked Lean models
-exercises/                  unsolved Lean and Python templates
-playground/                 participant workspace and ignored backups
-agents/                     optional Google ADK agent prototype
-src/                        constrained verification-tool implementation
-tests/                      participant-branch regression tests
-docs/                       design, facilitator, and workshop material
-scripts/                    implementation behind ./workshop
-```
-
-For workshop execution, start with the
-[participant curriculum](curriculum/README.md). Development notes remain in the
-[facilitator guide](docs/facilitator-guide.md) and
-[setup design](docs/setup-design.md).
+GitHub Actions remain disabled; all validation is local.

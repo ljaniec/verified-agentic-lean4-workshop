@@ -1,155 +1,197 @@
 # Live Demonstration Script
 
-This script is designed for the instructor machine. Run it once from a clean
-clone before the event and keep the terminal history available as a fallback.
+Use this together with the numbered [`curriculum/`](../curriculum/README.md).
+The participant branch deliberately contains no answers, so the instructor
+should prepare two separate checkouts before the event.
 
-## 0. Preflight
+## 0. Prepare two clearly labeled worktrees
+
+Participant-equivalent checkout:
+
+```text
+agent/initial-workshop-platform
+```
+
+Reference checkout:
+
+```text
+workshop/reference-solutions
+```
+
+One possible setup is:
+
+```bash
+git fetch origin
+git worktree add ../verified-agentic-lean4-workshop-solutions \
+  workshop/reference-solutions
+```
+
+Never switch the projected participant terminal onto the reference branch during
+an exercise.
+
+## 1. Preflight
+
+### Participant checkout
 
 ```bash
 ./workshop doctor
+./workshop setup
 ./workshop check
-./workshop scenario verify-solutions
 ```
 
-Expected result: all repository checks and all four reference scenarios pass.
+### Reference checkout
+
+Run its complete reference-solution validation and each prepared demo once
+before the event. Record the expected output locally as a fallback.
+
 No GitHub Actions service is involved.
 
-## 1. Lifecycle: a mode change is not resource cleanup
+## 2. Lifecycle exercise
+
+Follow:
+
+```text
+curriculum/01-lifecycle-resources/
+```
+
+On the participant checkout:
 
 ```bash
 ./workshop scenario start lifecycle
 ./workshop scenario status
-./workshop scenario check
 ```
 
-Expected result: the starter fails because the Lean proofs and corrected Python
-transition are incomplete. This is intentional.
+Let participants reproduce the buggy deactivation, repair the Python
+transition, check the finite toy state space, and work on the one-step Lean
+invariant proof.
 
-Show the buggy transition in both languages. Its `deactivate` branch changes the
-mode but leaves the sensor, log, and actuator fields unchanged. Ask the audience
-which invariant is violated before revealing the formal statement.
+The trace-induction task is optional when time is tight.
 
-Load the reference pair:
+If you need to show the completed result after the hands-on portion, use the
+**reference checkout** rather than replacing the participant file.
 
-```bash
-./workshop scenario solution lifecycle
-./workshop scenario status
-./workshop scenario check
+Emphasize:
+
+- lifecycle mode is only part of application state;
+- active mode requires its resources;
+- retained sensor/log/actuator resources require active mode;
+- the repaired transition preserves the invariant;
+- the formal trace theorem lifts local preservation to finite executions.
+
+## 3. Behavior Tree refinement exercise
+
+Follow:
+
+```text
+curriculum/02-behavior-tree-refinement/
 ```
 
-Point out:
-
-- Python exhaustively checks the finite state/event model;
-- Lean proves preservation for an arbitrary safe state and event;
-- the additional Lean theorem lifts the one-step invariant to every finite
-  lifecycle-event trace.
-
-Claim boundary: this proves properties of the workshop abstraction, not of an
-arbitrary ROS 2 implementation or hardware driver.
-
-## 2. Behavior Tree refactoring: preserve observable behavior
+On the participant checkout:
 
 ```bash
 ./workshop scenario start bt
-./workshop scenario check
 ```
 
-Use the observation:
+Have participants reason about the reference priority before searching for the
+counterexample.
+
+The key observation contains both a cancellation request and an available path.
+The reference policy prioritizes cancellation; the buggy rewrite may drive.
+
+Participants repair the Python FSM and prove pointwise equivalence in Lean. The
+trace-lifting theorem is a stretch task.
+
+Again, use the reference worktree only for the prepared completed proof.
+
+## 4. VDA 5050-inspired demo
+
+Follow:
 
 ```text
-cancel_requested = true
-path_available = true
+curriculum/03-vda5050-demo/
 ```
 
-The Behavior Tree selects `STOP_AND_CANCEL`; the buggy handwritten FSM selects
-`DRIVE` because it tests path availability first.
-
-```bash
-./workshop scenario solution bt
-./workshop scenario check
-```
-
-Point out the two proof levels:
-
-1. a concrete counterexample disproves the buggy refactoring;
-2. pointwise equivalence of the corrected FSM and BT lifts to equality of every
-   finite observable decision trace.
-
-Claim boundary: the first model intentionally omits `RUNNING`, asynchronous
-nodes, halting, and blackboard mutation. These features belong in later
-refinement layers.
-
-## 3. VDA 5050-inspired monitor: valid messages, invalid trace
-
-```bash
-./workshop scenario solution vda
-./workshop scenario check
-```
-
-Show the two invalid traces:
+Run the prepared monitor from the reference checkout. Show:
 
 ```text
 order(7, update=0)
 order(7, update=0)
 ```
 
-and:
+and a state trace whose reported node sequence regresses.
+
+Make the structured diagnostic visible: violation kind plus first rejected
+message index.
+
+Then show the corresponding Lean claims.
+
+Claim boundary: this is a VDA 5050-inspired teaching profile, not full
+conformance certification.
+
+## 5. Perception-planner uncertainty demo
+
+Follow:
 
 ```text
-state(order=7, last_node=4)
-state(order=7, last_node=3)
-```
-
-The detailed monitor reports respectively:
-
-```text
-ORDER_UPDATE_NOT_INCREASING at message index 1
-NODE_SEQUENCE_REGRESSED at message index 2
-```
-
-Point out the distinction:
-
-```text
-schema/type validation checks one message
-trace conformance checks temporal relationships between messages
-```
-
-Claim boundary: this is a small teaching profile inspired by VDA 5050, not a
-full conformance or certification tool.
-
-## 4. Perception-planner contract: point estimate versus uncertainty set
-
-```bash
-./workshop scenario solution uncertainty
-./workshop scenario check
+curriculum/04-uncertainty-demo/
 ```
 
 Use:
 
 ```text
-path interval       [0, 8]
-point estimate      10
-uncertainty interval [6, 10]
+path interval          [0, 8]
+point estimate         10
+uncertainty interval   [6, 10]
 ```
 
-The point-estimate baseline accepts because 10 is outside the path. The robust
-policy falls back because the certified uncertainty interval overlaps the path.
-Lean proves that whenever the robust policy accepts, every point in the path is
-different from every point allowed by the uncertainty interval.
+First show why the point-estimate policy accepts. Then reveal why the
+set-valued policy falls back and show the universal Lean theorem for accepted
+plans.
 
-Claim boundary: the demo uses one-dimensional integer intervals. The theorem
-shape, rather than the geometry, is the reusable lesson.
+Claim boundary: the model is one-dimensional and demonstrates the contract
+shape, not a complete perception/planning safety proof.
 
-## Recovery during the event
+## 6. Gemini-assisted verification finale
 
-Loading a new starter or solution automatically backs up the current editable
-pair under `playground/backups/`.
+Follow:
+
+```text
+curriculum/05-gemini-verification-demo/
+```
+
+Use the live Gemini/agent integration only after it has passed an end-to-end
+rehearsal on the event setup.
+
+The intended sequence is:
+
+```text
+Gemini candidate
+    → constrained checker call
+    → Lean rejection
+    → diagnostic returned to Gemini
+    → repaired candidate
+    → Lean verification
+```
+
+Prepare a deterministic fallback using a known-invalid candidate and a known
+repaired candidate. The audience must see the same trust boundary even when
+cloud access is unavailable.
+
+## 7. Recovery during the event
+
+The participant scenario loader backs up unfinished work before switching to a
+new starter:
 
 ```bash
 ./workshop scenario status
 ./workshop scenario clean
 ```
 
-If cloud access or Gemini fails, continue with these four local scenarios and
-Lean Copilot. If Lean Copilot is unavailable, use `simp?`, `exact?`, `apply?`,
-`aesop?`, and the committed reference solutions.
+Do not expose the reference branch simply because one participant falls behind.
+Use the curriculum's hints and timeboxes; later demos are independent of local
+exercise completion.
+
+If Gemini is unavailable, use the deterministic local verifier demo. If Lean
+Copilot models are unavailable, use standard Mathlib/Lean suggestions such as
+`simp?`, `exact?`, `apply?`, and `aesop?` while keeping the same verification
+message.

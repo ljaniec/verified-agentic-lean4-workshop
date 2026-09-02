@@ -1,108 +1,123 @@
 # Workshop Scenarios
 
-The first 90-minute workshop uses four scenarios with one repeated pattern:
+The first 90-minute workshop uses four formalized robotics scenarios with one
+repeated pattern:
 
 ```text
-executable model -> counterexample or monitor -> Lean theorem -> checked result
+executable model -> counterexample or monitor -> Lean claim -> checked result
 ```
 
-Each scenario has:
+The participant branch contains:
 
-- an unsolved Lean template in `exercises/lean/`;
-- an unsolved Python template in `exercises/python/`;
-- a compiled Lean reference solution in `VerifiedAgenticWorkshop/Solutions/`;
-- an executable Python reference solution in `solutions/python/`.
+- shared Lean scenario models under `VerifiedAgenticWorkshop/Scenarios/`;
+- unsolved Lean templates in `exercises/lean/`;
+- unsolved Python templates in `exercises/python/`;
+- numbered instructions under `curriculum/`.
+
+Completed Lean/Python answers are intentionally maintained separately on the
+facilitator reference branch and are not loadable from the participant CLI.
 
 Use the scenario loader instead of copying files manually:
 
 ```bash
 ./workshop scenario start lifecycle
-./workshop scenario check
-./workshop scenario solution lifecycle
-./workshop scenario check
-```
-
-Loading another starter or solution first backs up the current editable pair
-under `playground/backups/`. Inspect the loaded source with:
-
-```bash
 ./workshop scenario status
+./workshop scenario check
 ```
+
+Loading another starter first backs up the current editable pair under
+`playground/backups/`.
 
 ## 1. Lifecycle resources
 
 **Role:** shared introductory exercise.
 
-A managed ROS 2 node has a lifecycle mode, but the application also owns a
-sensor handle, a log file, and actuator authority. The deliberately faulty
-`deactivate` transition changes only the lifecycle mode. The exercise exposes
-the resulting unsafe state and proves that the corrected transition system
-preserves the application invariant.
+A managed ROS 2-style node has a lifecycle mode, but the application also owns
+a sensor handle, a log resource, and actuator authority. The deliberately
+faulty `deactivate` transition changes only the lifecycle mode. The exercise
+exposes the resulting unsafe state and repairs the transition.
 
-The reference development then lifts one-step preservation to every finite
-lifecycle-event trace. This is the bridge from checking one transition to
-reasoning about an entire mission fragment.
+The intended application invariant includes both directions of resource
+ownership:
 
-This follows the ROS 2 managed-node design: `Unconfigured`, `Inactive`,
-`Active`, and `Finalized` are primary states; activation may acquire resources
-held only while active, and deactivation should reverse those changes.
+```text
+Active → sensorOpen ∧ logOpen
+sensorOpen → Active
+logOpen → Active
+actuatorEnabled → Active
+```
+
+plus cleanup requirements for terminal/unconfigured modes.
+
+Participants use Python to inspect the bug and exhaustively check the finite toy
+state space, then Lean to establish one-step invariant preservation. A stretch
+task lifts that result to every finite lifecycle-event trace.
+
+This is a simplified application-level lifecycle model, not a complete ROS 2
+lifecycle semantics.
 
 Reference: <https://design.ros2.org/articles/node_lifecycle.html>
+
+Detailed tasks: [`../curriculum/01-lifecycle-resources/`](../curriculum/01-lifecycle-resources/README.md)
 
 ## 2. Behavior Tree refinement
 
 **Role:** main exercise.
 
-The reference policy is a simplified Fallback whose children are
-condition-action Sequences. Cancellation has the highest priority. A
-handwritten replacement checks path availability first and can therefore issue
-a drive command after cancellation. Participants prove the counterexample and
-then prove observational equivalence of the repaired FSM and the reference BT
-for every Boolean observation.
+The reference policy is a simplified Fallback of condition-action branches.
+Cancellation has the highest priority. A deliberately buggy handwritten
+replacement checks path availability first and can therefore issue a drive
+decision after cancellation.
 
-The reference theorem also lifts pointwise equivalence to equality of all
-finite observable decision traces. This expresses a practical refactoring
-contract: internal code may change while externally relevant behavior remains
-the same.
+Participants:
 
-The model intentionally omits `RUNNING`, asynchronous actions, and blackboard
-state. It isolates the refactoring contract before those features are added.
+1. read the reference priority semantics;
+2. construct a concrete counterexample to the buggy rewrite;
+3. repair the Python FSM;
+4. prove pointwise behavioral equivalence in Lean;
+5. optionally lift pointwise equivalence to finite observable traces.
+
+The model intentionally omits `RUNNING`, asynchronous actions, blackboard state,
+and concurrent subtrees. It isolates the refinement idea before those features
+are added.
 
 Reference: <https://www.behaviortree.dev/docs/nodes-library/FallbackNode/>
 
 ### Real-world motivation
 
-This scenario is based on an industrial fleet-management experience. A large
-Behavior Tree implementation became difficult for another developer to debug
-and extend, so a substantial part was discarded and rewritten as handwritten
-robot-state transition code. The rewrite had no machine-checked statement of
-which observable behavior, cancellation priority, or safety invariant had to
-be preserved. A refinement theorem would have turned that implicit expectation
-into a regression contract.
+This scenario is motivated by an industrial fleet-management experience in
+which a substantial Behavior Tree implementation became difficult to maintain
+and was replaced with handwritten robot-state transition logic. The rewrite had
+no machine-checked statement of which observable behavior, cancellation
+priority, or safety invariant had to remain unchanged. A refinement theorem
+turns that implicit expectation into a regression contract.
 
-## 3. VDA 5050 semantic trace monitor
+Detailed tasks: [`../curriculum/02-behavior-tree-refinement/`](../curriculum/02-behavior-tree-refinement/README.md)
 
-**Role:** short instructor demonstration.
+## 3. VDA 5050-inspired semantic trace monitor
 
-The exercise uses a deliberately small typed profile inspired by VDA 5050
-3.0. A message can be structurally well-typed while a sequence is semantically
-invalid. The monitor checks:
+**Role:** short facilitator demonstration.
 
-- a new order starts with update ID 0;
-- updates for the current order increase;
-- state messages refer to the current order;
-- reported node progress never decreases.
+A message can be structurally well-typed while a sequence is semantically
+invalid. The teaching monitor tracks a small subset of temporal state such as
+order/update identity and reported node progress.
 
-The detailed monitor returns a typed violation rather than only `none`. The
-Python demonstration additionally reports the zero-based index of the first
-rejected message. The stale update and regressing progress examples therefore
-produce actionable diagnostics, not only a Boolean verdict.
+It demonstrates:
 
-This is not a complete VDA 5050 verifier and must not be described as
-certification of the full standard.
+- stale order updates;
+- order/state mismatch style failures;
+- regressing progress;
+- typed violation diagnostics;
+- the first rejected message index on the Python side;
+- corresponding checked Lean examples on the reference branch.
+
+This is a deliberately small VDA 5050-inspired profile, not certification of
+the full standard.
 
 Official specification and JSON schemas:
 <https://github.com/VDA5050/VDA5050>
+
+Demo steps: [`../curriculum/03-vda5050-demo/`](../curriculum/03-vda5050-demo/README.md)
 
 ## 4. Perception-planner uncertainty contract
 
@@ -110,33 +125,48 @@ Official specification and JSON schemas:
 
 The perception component supplies a closed interval of possible obstacle
 positions. The planner may accept a path interval only when the two intervals
-are separated; otherwise it falls back or replans.
+are separated; otherwise it falls back/replans.
 
-The demo contrasts this policy with a weaker point-estimate baseline. For path
-`[0, 8]`, a point estimate at `10` appears safe, while the certified uncertainty
-interval `[6, 10]` overlaps the path. The point baseline accepts and the
-set-valued policy falls back.
+The demo contrasts this with a weaker point-estimate baseline. For path
+`[0, 8]`, a point estimate at `10` appears safe while an uncertainty interval
+`[6, 10]` overlaps the path.
 
-Python demonstrates the executable policy over finite integer examples. Lean
-proves the universal contract:
+The checked reference theorem states that whenever the set-aware planner
+accepts, every point allowed by the path is different from every obstacle
+position allowed by the uncertainty interval.
 
-> If the set-valued planner accepts, no path point equals any obstacle position
-> permitted by the uncertainty interval.
+The one-dimensional interval is intentionally small. The reusable idea is the
+contract between an uncertain perception output and a planner, not the geometry
+itself.
 
-The one-dimensional interval is intentionally small. It introduces the logical
-shape later used for boxes, polytopes, reachable sets, or conformal prediction
-sets without requiring those representations during the first workshop.
+Demo steps: [`../curriculum/04-uncertainty-demo/`](../curriculum/04-uncertainty-demo/README.md)
 
-## Suggested timing
+## 5. Gemini-assisted verification finale
+
+The final guided demo is organized separately because the Google agent
+integration is still being finalized. Its critical concept does not depend on
+cloud availability:
+
+```text
+proposal -> constrained verifier -> rejection/feedback -> repair -> verification
+```
+
+The live Gemini path is used only after end-to-end rehearsal. A deterministic
+local fallback must demonstrate the same trust boundary.
+
+Demo steps: [`../curriculum/05-gemini-verification-demo/`](../curriculum/05-gemini-verification-demo/README.md)
+
+## Timing
 
 | Time | Activity |
 |---:|---|
-| 0-12 min | Trust boundary, Lean, Lean Copilot, and executable models |
-| 12-32 min | Lifecycle resources exercise |
-| 32-67 min | Behavior Tree to FSM refinement exercise |
-| 67-77 min | VDA 5050 trace-monitor demonstration |
-| 77-87 min | Perception-planner uncertainty demonstration |
-| 87-90 min | Summary and next steps |
+| 0–10 min | Setup, motivation, trust boundary |
+| 10–30 min | Lifecycle resources exercise |
+| 30–62 min | Behavior Tree refinement exercise |
+| 62–69 min | VDA 5050-inspired trace-monitor demo |
+| 69–76 min | Perception-planner uncertainty demo |
+| 76–87 min | Gemini/verification-loop demo or fallback |
+| 87–90 min | Wrap-up |
 
 The command-by-command instructor sequence is in
-[`docs/live-demo-script.md`](live-demo-script.md).
+[`live-demo-script.md`](live-demo-script.md).

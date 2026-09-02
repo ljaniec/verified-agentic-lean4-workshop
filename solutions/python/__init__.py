@@ -1,1 +1,0 @@
-"""Executable Python reference solutions."""

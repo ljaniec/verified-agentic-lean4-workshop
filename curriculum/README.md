@@ -5,14 +5,16 @@ Work through the numbered folders in order. Every task folder contains only the
 information needed for that step: the objective, exact commands, expected
 observation, hints, completion criteria, and a recovery path.
 
-## Branch policy
+## Answer policy
 
 The participant branch intentionally contains **no reference solutions**.
 Completed Lean proofs, Python implementations, facilitator notes, and answer
-keys live on the separate `workshop/reference-solutions` branch.
+keys are maintained separately for facilitator preparation and post-workshop
+release.
 
-Do not switch to that branch during the workshop unless the facilitator
-explicitly asks you to do so after the session.
+You do not need the completed answers to continue with later stages: stretch
+proofs are optional, unfinished work is backed up automatically, and the final
+sections are facilitator-led demos.
 
 ## Timing
 

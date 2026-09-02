@@ -1,14 +1,14 @@
 # From Hallucination to Proof
 
-**Verified AI agents with Gemini, Google ADK, Lean Copilot, and Lean 4**
+**Trustworthy AI-assisted robotics development with Gemini and Lean 4**
 
-This private starter repository supports a hands-on workshop on trustworthy
-AI-assisted formalization of robotics software. Language models may plan,
-propose, explain, falsify, and repair. Lean 4 is the independent verification
-authority.
+This repository is the participant-facing working version of a 90-minute
+hands-on workshop on AI-assisted formal verification for robotics software.
+Language models may propose, explain, falsify, and repair. Lean 4 is the
+independent verification authority.
 
 The live workshop, repository content, code, and participant-facing technical
-material are all written and delivered in English.
+material are all in English.
 
 ## Core principle
 
@@ -18,78 +18,75 @@ model proposal != proof
 proposal -> executable check -> Lean compilation -> verified or rejected
 ```
 
-## Two-command setup
+## Start here
 
-Install Git, Git LFS, and Lean through `elan`. Install Python 3.11/3.12 and `uv`
-for the Python and Google ADK portions.
+Before the event:
 
 ```bash
 ./workshop setup
 ./workshop check
 ```
 
-Lean-only setup:
+Then follow the numbered participant curriculum:
 
-```bash
-./workshop setup --lean-only
-./workshop check --lean-only
-```
+**[`curriculum/README.md`](curriculum/README.md)**
 
-For a fast environment test without Lean Copilot model weights:
+The curriculum contains one folder per stage and one subfolder per concrete
+task or demo step, with exact commands, expected observations, non-spoiling
+hints, completion criteria, and recovery instructions.
 
-```bash
-./workshop setup --lean-only --skip-models
-```
+## Workshop path
 
-## First workshop scenarios
+The 90-minute version contains two participant exercises and three short guided
+segments:
 
-The 90-minute version uses two exercises and two short demonstrations:
-
-1. ROS 2 lifecycle + sensor + log file + actuator resources;
+1. ROS 2-style lifecycle + sensor + log + actuator resources;
 2. Behavior Tree to handwritten FSM refinement;
-3. VDA 5050-inspired semantic trace monitoring;
-4. perception-planner contract over an uncertainty interval.
+3. VDA 5050-inspired temporal-conformance demo;
+4. perception-planner contract under uncertainty demo;
+5. Gemini-assisted proposal/rejection/repair demo, when the tested integration
+   is available, with a deterministic local fallback.
 
-Every scenario has an unsolved Lean template, an unsolved Python template, and
-checked reference solutions in both languages.
+Available starter scenarios are:
 
 ```bash
 ./workshop scenario list
 ./workshop scenario start lifecycle
-./workshop scenario status
-./workshop scenario check
-
-# Reveal the reference pair when needed.
-./workshop scenario solution lifecycle
-./workshop scenario check
+./workshop scenario start bt
+./workshop scenario start vda
+./workshop scenario start uncertainty
 ```
 
-The currently loaded files are placed in:
+The active files are:
 
 ```text
 playground/current/Current.lean
 playground/current/current.py
 ```
 
-Before another starter or solution is loaded, the current pair is backed up
-under `playground/backups/`. The scenario checker rejects explicit proof holes,
-treats Lean warnings as errors, compiles the exact Lean file, and executes the
-matching Python program.
-
-The instructor can validate every committed reference pair with:
+Check exactly that pair with:
 
 ```bash
-./workshop scenario verify-solutions
+./workshop scenario check
 ```
 
-See [the scenario guide](docs/scenarios.md),
-[the 90-minute plan](docs/workshop-plan.md), and
-[the live demonstration script](docs/live-demo-script.md).
+Participant work is automatically backed up under `playground/backups/` before
+another starter replaces it.
+
+## Reference solutions are intentionally absent
+
+The participant branch contains no completed Lean proofs or Python reference
+implementations and provides no `scenario solution` command.
+
+Reference answers are maintained separately for facilitator preparation and
+post-workshop study. A separate Git branch prevents accidental spoilers but is
+not access control: if this repository is made public before the event, the
+reference branch should remain unpublished/private until the workshop ends.
 
 ## Lean Copilot
 
 The project pins Lean 4.28, Mathlib 4.28, and Lean Copilot 4.28. In an exercise,
-participants can try:
+participants may try commands such as:
 
 ```lean
 suggest_tactics
@@ -97,45 +94,43 @@ search_proof
 select_premises
 ```
 
-Generated suggestions remain candidates until the exact file compiles.
+A generated suggestion is still only a candidate until the exact file compiles.
 
-## Google ADK tutor
+## Optional Google agent layer
 
-Copy `.env.example` to `.env`, set `GOOGLE_API_KEY`, and optionally change
-`GOOGLE_MODEL`. Then run:
+The repository contains a constrained Google ADK/Gemini prototype for the final
+agentic-verification demonstration. It is optional and remains separate from
+the Lean-only participant path while integration is being finalized.
 
-```bash
-./workshop agent
-# or
-./workshop agent-web
+The intended boundary is:
+
+```text
+Gemini proposal
+    -> constrained tool call
+    -> Lean checker
+    -> verifier feedback
+    -> repair
 ```
 
-The agent cannot execute arbitrary shell commands. It can only list, read,
-scan, and compile allowed workshop Lean files. It must not report a proof as
-verified unless the compile tool returns `status=verified`.
+The agent receives no arbitrary shell tool and must not report a proof as
+verified unless the actual Lean checker succeeds.
 
-## Aristotle compatibility
-
-The repository is a standard Lake project and can be submitted without source
-repackaging:
+## Lean-only setup
 
 ```bash
-export ARISTOTLE_API_KEY=...
-./workshop aristotle \
-  "Fill the selected proof obligations without sorry or new axioms."
+./workshop setup --lean-only
+./workshop check --lean-only
 ```
 
-## Why LeanDojo is not installed for every participant
+For a fast environment test without downloading Lean Copilot model weights:
 
-Lean Copilot already provides tactic suggestion, proof search, and premise
-selection. LeanDojo remains useful for trace extraction, dataset construction,
-project-aware premise indexing, and prover evaluation, but is intentionally
-outside the default participant setup.
+```bash
+./workshop setup --lean-only --skip-models
+```
 
 ## Local acceptance gate
 
-GitHub Actions are intentionally disabled. Every pull request is checked
-locally:
+GitHub Actions are intentionally disabled. Repository validation is local:
 
 ```bash
 ./workshop check
@@ -147,17 +142,18 @@ Lean build and committed playground, Ruff, mypy, and pytest.
 ## Repository map
 
 ```text
-VerifiedAgenticWorkshop/   checked Lean models and reference proofs
+curriculum/                 numbered participant steps and demo runbooks
+VerifiedAgenticWorkshop/    shared checked Lean models
 exercises/                  unsolved Lean and Python templates
-solutions/python/           executable Python reference solutions
 playground/                 participant workspace and ignored backups
-agents/                     optional Google ADK agent
-src/                        constrained Lean tool implementation
-tests/                      local Python tests
-docs/                       participant and facilitator material
+agents/                     optional Google ADK agent prototype
+src/                        constrained verification-tool implementation
+tests/                      participant-branch regression tests
+docs/                       design, facilitator, and workshop material
 scripts/                    implementation behind ./workshop
 ```
 
-Read [the participant guide](docs/participant-guide.md),
-[the facilitator guide](docs/facilitator-guide.md), and
-[the setup design](docs/setup-design.md).
+For workshop execution, start with the
+[participant curriculum](curriculum/README.md). Development notes remain in the
+[facilitator guide](docs/facilitator-guide.md) and
+[setup design](docs/setup-design.md).

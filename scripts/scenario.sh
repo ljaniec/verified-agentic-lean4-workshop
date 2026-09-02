@@ -12,8 +12,10 @@ Usage: ./workshop scenario <command> [name]
 Commands:
   list                     List available scenarios.
   start <name>             Load an unsolved Lean and Python starter.
-  status                   Show the currently loaded scenario.
+  solution <name>          Load the reference Lean and Python solution.
+  status                   Show the currently loaded scenario and source.
   check                    Compile and run the currently loaded pair.
+  verify-solutions         Check all committed reference solutions.
   clean                    Back up and remove the currently loaded pair.
 
 Scenario names:
@@ -21,8 +23,6 @@ Scenario names:
   bt                       Behavior Tree to handwritten FSM refinement
   vda                      VDA 5050-inspired semantic trace monitor
   uncertainty              Perception-planner uncertainty contract
-
-Reference solutions are intentionally absent from the participant branch.
 USAGE
 }
 
@@ -31,18 +31,26 @@ scenario_files() {
     lifecycle)
       LEAN_STEM="01_LifecycleResources"
       PYTHON_STEM="01_lifecycle_resources"
+      SOLUTION_LEAN="LifecycleResources"
+      SOLUTION_PYTHON="lifecycle_resources"
       ;;
     bt)
       LEAN_STEM="02_BehaviorTreeRefinement"
       PYTHON_STEM="02_behavior_tree_refinement"
+      SOLUTION_LEAN="BehaviorTreeRefinement"
+      SOLUTION_PYTHON="behavior_tree_refinement"
       ;;
     vda)
       LEAN_STEM="03_VDA5050Trace"
       PYTHON_STEM="03_vda5050_trace"
+      SOLUTION_LEAN="VDA5050Trace"
+      SOLUTION_PYTHON="vda5050_trace"
       ;;
     uncertainty)
       LEAN_STEM="04_PerceptionPlannerContract"
       PYTHON_STEM="04_perception_planner_contract"
+      SOLUTION_LEAN="PerceptionPlannerContract"
+      SOLUTION_PYTHON="perception_planner_contract"
       ;;
     *)
       fail "unknown scenario '$1'; run './workshop scenario list'"
@@ -58,7 +66,7 @@ safe_metadata_value() {
     scenario:lifecycle|scenario:bt|scenario:vda|scenario:uncertainty)
       printf '%s' "$value"
       ;;
-    source:starter)
+    source:starter|source:reference-solution)
       printf '%s' "$value"
       ;;
     *)
@@ -92,8 +100,9 @@ backup_current() {
 
 write_metadata() {
   local scenario="$1"
+  local source="$2"
   printf '%s\n' "$scenario" > "$CURRENT_DIR/scenario"
-  printf 'starter\n' > "$CURRENT_DIR/source"
+  printf '%s\n' "$source" > "$CURRENT_DIR/source"
 }
 
 load_start() {
@@ -105,8 +114,21 @@ load_start() {
     "$CURRENT_DIR/Current.lean"
   cp "$REPOSITORY_ROOT/exercises/python/$PYTHON_STEM.py.template" \
     "$CURRENT_DIR/current.py"
-  write_metadata "$scenario"
+  write_metadata "$scenario" "starter"
   log "Loaded unsolved '$scenario' scenario into playground/current"
+}
+
+load_solution() {
+  local scenario="$1"
+  scenario_files "$scenario"
+  backup_current
+  mkdir -p "$CURRENT_DIR"
+  cp "$REPOSITORY_ROOT/VerifiedAgenticWorkshop/Solutions/$SOLUTION_LEAN.lean" \
+    "$CURRENT_DIR/Current.lean"
+  cp "$REPOSITORY_ROOT/solutions/python/$SOLUTION_PYTHON.py" \
+    "$CURRENT_DIR/current.py"
+  write_metadata "$scenario" "reference-solution"
+  log "Loaded reference solution for '$scenario'"
 }
 
 show_status() {
@@ -116,7 +138,7 @@ show_status() {
   fi
 
   printf 'Scenario: %s\n' "$(cat "$CURRENT_DIR/scenario")"
-  printf 'Source:   starter\n'
+  printf 'Source:   %s\n' "$(cat "$CURRENT_DIR/source" 2>/dev/null || printf 'unknown')"
   printf 'Lean:     %s\n' "${CURRENT_DIR#$REPOSITORY_ROOT/}/Current.lean"
   printf 'Python:   %s\n' "${CURRENT_DIR#$REPOSITORY_ROOT/}/current.py"
 }
@@ -142,6 +164,30 @@ check_current() {
   log "Current scenario passed both checks"
 }
 
+verify_solutions() {
+  require_command lake
+  require_command python3
+  cd "$REPOSITORY_ROOT"
+
+  bash "$REPOSITORY_ROOT/scripts/check_forbidden_constructs.sh"
+
+  for lean_file in VerifiedAgenticWorkshop/Solutions/*.lean; do
+    log "Checking $lean_file"
+    lake env lean -DwarningAsError=true "$lean_file"
+  done
+
+  for python_file in solutions/python/*.py; do
+    if [[ "$python_file" == *"/__init__.py" ]]; then
+      continue
+    fi
+    log "Checking $python_file"
+    python3 -m py_compile "$python_file"
+    python3 "$python_file"
+  done
+
+  log "All committed scenario solutions passed"
+}
+
 command_name="${1:-list}"
 if [[ $# -gt 0 ]]; then
   shift
@@ -155,6 +201,10 @@ case "$command_name" in
     [[ $# -eq 1 ]] || fail "usage: ./workshop scenario start <name>"
     load_start "$1"
     ;;
+  solution)
+    [[ $# -eq 1 ]] || fail "usage: ./workshop scenario solution <name>"
+    load_solution "$1"
+    ;;
   status)
     [[ $# -eq 0 ]] || fail "usage: ./workshop scenario status"
     show_status
@@ -162,6 +212,10 @@ case "$command_name" in
   check)
     [[ $# -eq 0 ]] || fail "usage: ./workshop scenario check"
     check_current
+    ;;
+  verify-solutions)
+    [[ $# -eq 0 ]] || fail "usage: ./workshop scenario verify-solutions"
+    verify_solutions
     ;;
   clean)
     [[ $# -eq 0 ]] || fail "usage: ./workshop scenario clean"

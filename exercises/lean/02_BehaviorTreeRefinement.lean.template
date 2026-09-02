@@ -11,18 +11,26 @@ open VerifiedAgenticWorkshop.Scenarios.BehaviorTreeRefinement
 The reference BT gives cancellation higher priority than navigation. The buggy
 replacement checks `pathAvailable` first.
 
-1. Prove the concrete counterexample.
-2. Prove observational equivalence of the corrected FSM and the BT for every
-   Boolean observation.
+The numbered curriculum assigns these obligations:
+
+1. prove the concrete counterexample after reproducing it in Python;
+2. prove observational equivalence of the corrected FSM and reference policy;
+3. optionally lift pointwise equivalence to finite observable traces.
 -/
 
 theorem buggy_refactoring_counterexample :
     buggyFsmDecision cancelWhilePathAvailable ≠
       btDecision cancelWhilePathAvailable := by
-  -- TODO
+  -- TODO: curriculum Task 02.2
 
 theorem corrected_fsm_matches_bt (observation : Observation) :
     fsmDecision observation = btDecision observation := by
-  -- TODO
+  -- TODO: curriculum Task 02.4
+
+/-- Stretch task: the same observations produce the same finite decision trace. -/
+theorem corrected_fsm_trace_matches_bt (observations : List Observation) :
+    decisionTrace fsmDecision observations =
+      decisionTrace btDecision observations := by
+  -- TODO: curriculum Task 02.5
 
 end WorkshopExercise.BehaviorTreeRefinement

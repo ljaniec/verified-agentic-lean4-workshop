@@ -23,32 +23,24 @@ def prepare_fixture(root: Path) -> None:
 
     lean_exercises = root / "exercises" / "lean"
     python_exercises = root / "exercises" / "python"
-    lean_solutions = root / "VerifiedAgenticWorkshop" / "Solutions"
-    python_solutions = root / "solutions" / "python"
-
-    for directory in (
-        lean_exercises,
-        python_exercises,
-        lean_solutions,
-        python_solutions,
-    ):
-        directory.mkdir(parents=True)
+    lean_exercises.mkdir(parents=True)
+    python_exercises.mkdir(parents=True)
 
     (lean_exercises / "01_LifecycleResources.lean.template").write_text(
-        "starter Lean\n", encoding="utf-8"
+        "lifecycle starter Lean\n", encoding="utf-8"
     )
     (python_exercises / "01_lifecycle_resources.py.template").write_text(
-        "print('starter Python')\n", encoding="utf-8"
+        "print('lifecycle starter Python')\n", encoding="utf-8"
     )
-    (lean_solutions / "LifecycleResources.lean").write_text(
-        "solution Lean\n", encoding="utf-8"
+    (lean_exercises / "02_BehaviorTreeRefinement.lean.template").write_text(
+        "bt starter Lean\n", encoding="utf-8"
     )
-    (python_solutions / "lifecycle_resources.py").write_text(
-        "print('solution Python')\n", encoding="utf-8"
+    (python_exercises / "02_behavior_tree_refinement.py.template").write_text(
+        "print('bt starter Python')\n", encoding="utf-8"
     )
 
 
-def test_switching_to_solution_preserves_participant_work(tmp_path: Path) -> None:
+def test_switching_scenarios_preserves_participant_work(tmp_path: Path) -> None:
     prepare_fixture(tmp_path)
 
     run_scenario(tmp_path, "start", "lifecycle")
@@ -57,23 +49,22 @@ def test_switching_to_solution_preserves_participant_work(tmp_path: Path) -> Non
     assert (current / "source").read_text(encoding="utf-8") == "starter\n"
 
     (current / "Current.lean").write_text("participant work\n", encoding="utf-8")
-    run_scenario(tmp_path, "solution", "lifecycle")
+    run_scenario(tmp_path, "start", "bt")
 
     backups = list((tmp_path / "playground" / "backups").iterdir())
     assert len(backups) == 1
     assert (backups[0] / "Current.lean").read_text(
         encoding="utf-8"
     ) == "participant work\n"
-    assert (current / "source").read_text(
-        encoding="utf-8"
-    ) == "reference-solution\n"
+    assert (current / "scenario").read_text(encoding="utf-8") == "bt\n"
+    assert (current / "source").read_text(encoding="utf-8") == "starter\n"
     assert (current / "Current.lean").read_text(
         encoding="utf-8"
-    ) == "solution Lean\n"
+    ) == "bt starter Lean\n"
 
     status = run_scenario(tmp_path, "status")
-    assert "Scenario: lifecycle" in status.stdout
-    assert "Source:   reference-solution" in status.stdout
+    assert "Scenario: bt" in status.stdout
+    assert "Source:   starter" in status.stdout
 
 
 def test_tampered_metadata_cannot_escape_backup_root(tmp_path: Path) -> None:
@@ -85,7 +76,7 @@ def test_tampered_metadata_cannot_escape_backup_root(tmp_path: Path) -> None:
     (current / "scenario").write_text("../../../outside\n", encoding="utf-8")
     (current / "source").write_text("../../tampered\n", encoding="utf-8")
 
-    run_scenario(tmp_path, "solution", "lifecycle")
+    run_scenario(tmp_path, "start", "bt")
 
     backup_root = tmp_path / "playground" / "backups"
     backups = list(backup_root.iterdir())

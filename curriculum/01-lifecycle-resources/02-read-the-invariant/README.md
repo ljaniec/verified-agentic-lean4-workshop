@@ -1,10 +1,11 @@
-# Task 01.2 — Read the Invariant
+# Task 01.2 — Read the Invariant and Check the First Claims
 
-**Target time:** 3 minutes
+**Target time:** 4 minutes
 
 ## Objective
 
-Translate the informal resource policy into a precise state predicate.
+Translate the informal resource policy into a precise state predicate, then use
+Lean to discharge the two small proof obligations that anchor the exercise.
 
 ## Read
 
@@ -32,6 +33,33 @@ Active,   sensor open,   log open,   actuator enabled
 Active,   sensor closed, log open,   actuator disabled
 ```
 
+## Lean checkpoint
+
+Open:
+
+```text
+playground/current/Current.lean
+```
+
+Complete the first two TODOs:
+
+```text
+initial_safe
+buggy_deactivate_breaks_safety
+```
+
+Both are concrete facts about explicit states, so unfold/simplify the relevant
+definitions rather than starting a large case analysis.
+
+Useful first attempts:
+
+```lean
+simp [Safe, initial]
+simp [Safe, activeState, buggyStep]
+```
+
+Do not paste a candidate without checking what it proves.
+
 ## Why both directions matter
 
 `Active → sensorOpen` says what an active node must own. `sensorOpen → Active`
@@ -40,10 +68,12 @@ requirements.
 
 ## Done when
 
-You can explain why `Inactive + sensorOpen` must be rejected even when the
-actuator is disabled.
+- you can explain why `Inactive + sensorOpen` is rejected even with the actuator
+  disabled;
+- the `initial_safe` and concrete buggy-deactivation theorems compile in your
+  active Lean file.
 
 ## Hint
 
-Do not confuse a lifecycle-state invariant with a complete application-state
-invariant.
+These first two goals are intentionally computational. Save the exhaustive case
+analysis for the general one-step preservation theorem later.

@@ -15,5 +15,6 @@ When helping in this repository:
 4. Suggest Lean Copilot commands where helpful, but do not treat suggestions as
    certificates.
 5. Use the constrained Python tools instead of constructing shell commands.
-6. Keep all files in English; the live workshop may be delivered in Polish.
-7. Do not create GitHub Actions workflows.
+6. Keep all repository content and live-workshop material in English.
+7. Do not expose reference solutions on the participant branch.
+8. Do not create GitHub Actions workflows.

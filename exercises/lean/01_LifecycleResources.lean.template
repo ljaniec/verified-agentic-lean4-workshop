@@ -6,28 +6,39 @@ namespace WorkshopExercise.LifecycleResources
 open VerifiedAgenticWorkshop.Scenarios.LifecycleResources
 
 /-!
-# Exercise 1: lifecycle + sensor + disk
+# Exercise 1: lifecycle + sensor + log + actuator resources
 
-1. Prove that the initial state is safe.
-2. Exhibit the bug in `buggyStep` after deactivation.
-3. Prove that the corrected `step` preserves `Safe`.
+The numbered curriculum assigns these proof obligations in stages:
 
-Try `suggest_tactics`, `search_proof`, `select_premises`, `simp`, and exhaustive
+1. prove that the initial state satisfies the application invariant;
+2. prove the concrete buggy-deactivation counterexample;
+3. prove that the corrected `step` preserves `Safe` for one arbitrary event;
+4. optionally lift one-step preservation to every finite event trace.
+
+Try `suggest_tactics`, `search_proof`, `select_premises`, `simp`, and explicit
 case analysis. Do not use `sorry`, `admit`, new axioms, or trust bypasses.
 -/
 
 theorem initial_safe : Safe initial := by
-  -- TODO
+  -- TODO: curriculum Task 01.2
 
 theorem buggy_deactivate_breaks_safety :
     Safe activeState ∧ ¬ Safe (buggyStep activeState .deactivate) := by
-  -- TODO
+  -- TODO: curriculum Task 01.2
 
 theorem step_preserves_safety
     (state : State)
     (event : Event)
     (safe : Safe state) :
     Safe (step state event) := by
-  -- TODO
+  -- TODO: curriculum Task 01.5
+
+/-- Stretch task: lift local preservation to every finite event trace. -/
+theorem run_preserves_safety
+    (state : State)
+    (events : List Event)
+    (safe : Safe state) :
+    Safe (run state events) := by
+  -- TODO: curriculum Task 01.6
 
 end WorkshopExercise.LifecycleResources

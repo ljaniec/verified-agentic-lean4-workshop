@@ -4,6 +4,7 @@ from solutions.python.behavior_tree_refinement import (
     all_observations,
     bt_decision,
     buggy_fsm_decision,
+    counterexample_observation,
     decision_trace,
     fsm_decision,
 )
@@ -51,8 +52,9 @@ def test_lifecycle_reference_solution() -> None:
 
 
 def test_bt_refinement_reference_solution() -> None:
-    counterexample = Observation(True, False, True)
+    counterexample = counterexample_observation()
     trace = [Observation(False, False, True), counterexample]
+    assert counterexample == Observation(True, False, True)
     assert buggy_fsm_decision(counterexample) != bt_decision(counterexample)
     assert all(fsm_decision(obs) == bt_decision(obs) for obs in all_observations())
     assert decision_trace(fsm_decision, trace) == decision_trace(bt_decision, trace)

@@ -75,6 +75,14 @@ def buggy_fsm_decision(observation: Observation) -> Decision:
     return Decision.REQUEST_PLAN
 
 
+def counterexample_observation() -> Observation:
+    return Observation(
+        cancel_requested=True,
+        goal_reached=False,
+        path_available=True,
+    )
+
+
 def fsm_decision(observation: Observation) -> Decision:
     if observation.cancel_requested:
         return Decision.STOP_AND_CANCEL
@@ -96,7 +104,7 @@ def all_observations() -> list[Observation]:
 
 
 def main() -> None:
-    counterexample = Observation(True, False, True)
+    counterexample = counterexample_observation()
     trace = [
         Observation(False, False, False),
         Observation(False, False, True),

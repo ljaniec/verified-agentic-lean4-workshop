@@ -39,6 +39,14 @@ EXPECTED_TASKS = {
     "05-gemini-verification-demo/03-repair-and-verify",
 }
 
+LEGACY_PROTOTYPE_PATHS = {
+    "VerifiedAgenticWorkshop/Robotics",
+    "VerifiedAgenticWorkshop/Workshop/CopilotExamples.lean",
+    "playground/Exercise01Corridor.lean",
+    "playground/Exercise02Reservations.lean",
+    "playground/Exercise03Deadlock.lean",
+}
+
 
 def test_reference_solution_directories_are_absent() -> None:
     assert not (REPOSITORY_ROOT / "VerifiedAgenticWorkshop" / "Solutions").exists()
@@ -87,3 +95,20 @@ def test_optional_stretch_theorems_do_not_block_baseline_starters() -> None:
 
     assert "theorem run_preserves_safety" not in lifecycle
     assert "theorem corrected_fsm_trace_matches_bt" not in behavior_tree
+
+
+def test_legacy_prototype_material_is_absent() -> None:
+    remaining = [
+        path
+        for path in sorted(LEGACY_PROTOTYPE_PATHS)
+        if (REPOSITORY_ROOT / path).exists()
+    ]
+    assert not remaining, f"legacy workshop material returned: {remaining}"
+
+
+def test_playground_contains_only_runtime_guidance_when_clean() -> None:
+    playground = REPOSITORY_ROOT / "playground"
+    tracked_like_entries = {
+        path.name for path in playground.iterdir() if path.name not in {"current", "backups"}
+    }
+    assert tracked_like_entries == {"README.md"}

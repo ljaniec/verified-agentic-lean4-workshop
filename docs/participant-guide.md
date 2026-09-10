@@ -4,8 +4,8 @@
 
 The recommended environments are Linux, macOS, or Windows through WSL 2.
 Install Git, Git LFS, Lean through `elan`, Python 3.11 or 3.12, `uv`, and an
-editor with the Lean 4 extension. Antigravity may be used for the agent-oriented
-part but is not required for the Lean-only path.
+editor with Lean 4 support. Antigravity may be used for the agent-oriented part
+but is not required for the Lean-only path.
 
 ```bash
 git clone <repository-url>
@@ -26,14 +26,9 @@ when the facilitator confirms that the tested API/agent path is being used.
 
 ## During the workshop
 
-Follow the numbered instructions in:
-
-```text
-curriculum/
-```
-
 Start at [`curriculum/README.md`](../curriculum/README.md). Each task has its own
-folder with commands, objective, hints, completion criteria, and recovery path.
+folder with an objective, timebox, exact actions, hints, completion criteria,
+and a recovery path.
 
 Load a starter scenario with:
 
@@ -50,7 +45,7 @@ playground/current/Current.lean
 playground/current/current.py
 ```
 
-Check the active pair:
+At the end of the required part of a scenario, check the active pair with:
 
 ```bash
 ./workshop scenario check
@@ -66,7 +61,19 @@ The checker:
 
 A failing Python assertion can expose a concrete execution problem. A failing
 Lean theorem means the formal claim is not yet proved. Generated model or Lean
-Copilot output remains a candidate until the checker accepts it.
+Copilot output remains a candidate until the checker accepts the exact file.
+
+## Intermediate Lean checkpoints
+
+Some tasks ask you to finish one theorem while a later required TODO is still
+present in the same file. At those intermediate checkpoints, use the Lean editor
+goal/error state for the declaration you are working on. The complete file is
+not expected to pass `./workshop scenario check` until the baseline tasks for
+that scenario are finished.
+
+The optional finite-trace theorems are deliberately **not** predeclared in the
+baseline starters. If you skip a stretch task, it cannot leave an unresolved
+Lean goal that blocks the required scenario.
 
 Useful Lean Copilot commands include:
 
@@ -76,21 +83,25 @@ search_proof
 select_premises
 ```
 
+Treat their output as proof candidates, not certificates.
+
 ## Falling behind is expected and recoverable
 
-The workshop does **not** require every participant to finish every stretch
-proof. The lifecycle trace proof and BT trace-refinement proof are explicitly
-optional when time is tight. Later demos do not depend on your local exercise
-being complete.
+The workshop does not require every participant to finish every stretch proof.
+The lifecycle trace proof and BT trace-refinement proof are optional when time
+is tight. VDA 5050, uncertainty, and Gemini are facilitator-led demos and do
+not depend on your local exercise being complete.
 
-When switching to another starter, your current Lean/Python pair is backed up
+When switching to another starter, the current Lean/Python pair is backed up
 automatically under:
 
 ```text
 playground/backups/
 ```
 
-You can therefore move with the room and return to unfinished work later.
+Use the dedicated [`catch-up protocol`](../curriculum/CATCH_UP.md) rather than
+rushing or copying an answer. For technical failures, see the
+[`participant debugging guide`](participant-debugging.md).
 
 ## Reference solutions
 

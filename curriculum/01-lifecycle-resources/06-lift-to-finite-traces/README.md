@@ -6,17 +6,30 @@
 ## Objective
 
 Turn one-step preservation into a statement about every finite sequence of
-lifecycle events.
+lifecycle events without making this optional theorem block the main workshop
+path.
 
-## Goal
+## Before you start
 
-Use the shared `run` function and prove the trace-level property:
+The baseline starter intentionally does **not** predeclare this theorem. Tasks
+01.1–01.5 can therefore finish with a clean `./workshop scenario check` even if
+you skip this stretch task.
 
-```text
-Safe state → Safe (run state events)
+Only continue here when the baseline lifecycle scenario already passes.
+
+## Add this theorem
+
+Insert the following declaration before the final namespace `end` in
+`playground/current/Current.lean`:
+
+```lean
+theorem run_preserves_safety
+    (state : State)
+    (events : List Event)
+    (safe : Safe state) :
+    Safe (run state events) := by
+  -- prove the stretch theorem here
 ```
-
-for an arbitrary list of events.
 
 ## Key idea
 
@@ -41,13 +54,25 @@ induction events generalizing state
 simp [run]
 ```
 
-Use your one-step preservation theorem in the inductive case.
+Use your `step_preserves_safety` theorem in the inductive case.
+
+## Check
+
+If you choose to add the theorem, run:
+
+```bash
+./workshop scenario check
+```
 
 ## Done when
 
-The trace theorem compiles, or you can explain the induction argument verbally.
+Either the added trace theorem compiles, or you can explain the induction
+argument verbally and move on.
 
-## Timebox
+## Recovery / falling behind
 
-Do not let this stretch task delay the Behavior Tree exercise. The main concept
-is the induction structure, not proof golfing.
+Do not let this stretch task delay the Behavior Tree exercise. If your added
+optional theorem is unfinished when the facilitator moves on, keep a copy in
+your editor or backup, remove the incomplete addition from the baseline file if
+you still want a clean lifecycle check, and start the next scenario. The loader
+backs up the current pair automatically.

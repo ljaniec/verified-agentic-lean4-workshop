@@ -8,5 +8,10 @@ if [[ -d playground/current ]]; then
   bash "$REPOSITORY_ROOT/scripts/scenario.sh" clean
 fi
 
-git restore --source=HEAD --worktree -- playground
-log "Playground restored; any active scenario was backed up and removed"
+# Restore only tracked playground documentation/examples. Runtime state lives in
+# ignored `playground/current/` and `playground/backups/` directories.
+if git ls-files -- 'playground/*' | grep -q .; then
+  git restore --source=HEAD --worktree -- playground
+fi
+
+log "Playground runtime state reset; active work was backed up before removal"

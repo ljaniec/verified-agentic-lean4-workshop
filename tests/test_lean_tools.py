@@ -7,14 +7,21 @@ import pytest
 from verified_agentic_workshop.tools import lean
 
 
+_ALLOWED_PREFIXES = (
+    "playground/",
+    "VerifiedAgenticWorkshop/Scenarios/",
+    "VerifiedAgenticWorkshop/Workshop/",
+)
+
+
 def test_listed_files_stay_inside_allowed_roots() -> None:
     result = lean.list_lean_files()
     assert result["status"] == "success"
     files = result["files"]
     assert files
-    assert all(
-        str(path).startswith(("playground/", "VerifiedAgenticWorkshop/Workshop/"))
-        for path in files
+    assert all(str(path).startswith(_ALLOWED_PREFIXES) for path in files)
+    assert any(
+        str(path).startswith("VerifiedAgenticWorkshop/Scenarios/") for path in files
     )
 
 

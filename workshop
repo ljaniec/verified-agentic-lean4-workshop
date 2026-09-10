@@ -11,10 +11,10 @@ Commands:
   setup [--lean-only] [--skip-models]  Prepare the pinned workshop environment.
   doctor [--lean-only]                 Check prerequisites and explain fixes.
   check [--lean-only]                  Run local repository verification.
-  scenario <command> [name]            Load, check, or reveal workshop scenarios.
-  reset                                Restore committed playground files.
-  agent                                Start the Google ADK command-line tutor.
-  agent-web                            Start the Google ADK web tutor.
+  scenario <command> [name]            Load, inspect, or check starter scenarios.
+  reset                                Back up and clear active playground work.
+  agent                                Start the optional Google ADK CLI tutor.
+  agent-web                            Start the optional Google ADK web tutor.
   aristotle [prompt]                   Submit this Lean project to Aristotle.
   help                                 Show this message.
 
@@ -24,6 +24,9 @@ Recommended first run:
 
 Start the first scenario:
   ./workshop scenario start lifecycle
+  ./workshop scenario status
+
+Run the full scenario check after its required TODOs are complete:
   ./workshop scenario check
 USAGE
 }

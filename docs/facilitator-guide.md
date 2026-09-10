@@ -15,7 +15,9 @@ Use the numbered participant curriculum as the timing authority:
 | 87–90 min | Wrap-up |
 
 The participant sequence is under [`../curriculum/`](../curriculum/README.md).
-Every task is separately timeboxed and includes a recovery path.
+Every task is separately timeboxed and includes a recovery path. Rehearse the
+complete session with [`facilitator-rehearsal.md`](facilitator-rehearsal.md),
+not only with the completed answer files.
 
 ## Keep reference answers out of the participant checkout
 
@@ -37,7 +39,7 @@ git worktree add ../verified-agentic-lean4-workshop-solutions \
   workshop/reference-solutions
 ```
 
-Then keep two terminals clearly labeled:
+Keep two terminals clearly labeled:
 
 ```text
 participant checkout  → agent/initial-workshop-platform
@@ -45,15 +47,14 @@ facilitator checkout  → workshop/reference-solutions
 ```
 
 This prevents an accidental branch switch from exposing answers on the
-projector or overwriting participant work.
+projector or replacing participant work.
 
 ### Important publication note
 
 A Git branch is not access control. While the repository is private, the
 reference branch can remain on GitHub. If the participant repository becomes
-public before the event and answers must remain hidden, move the solution
-branch to a private repository/fork or delete it from the public remote and
-publish it only after the session.
+public before the event and answers must remain hidden, keep the solutions on a
+private remote or publish them only after the session.
 
 ## Pre-event acceptance
 
@@ -74,13 +75,38 @@ for scenario in lifecycle bt vda uncertainty; do
 done
 ```
 
-On the **reference-solutions worktree**, run the solution-branch validation and
-all prepared demo commands. Do not infer that a solution still compiles merely
-because the participant branch compiles.
+Then rehearse the two hands-on exercises from the numbered instructions as if
+you were a first-time participant. The required lifecycle path must reach a
+clean scenario check after Task 01.5; the required BT path must reach a clean
+scenario check after Task 02.4. The optional trace theorems are added only by
+participants who choose the stretch tasks and must not block the baseline.
+
+On the **reference-solutions worktree**, run:
+
+```bash
+./workshop check
+./workshop scenario verify-solutions
+
+for scenario in lifecycle bt vda uncertainty; do
+  ./workshop scenario solution "$scenario"
+  ./workshop scenario check
+done
+```
+
+Before release, confirm that the reference overlay is not behind the participant
+branch:
+
+```bash
+git rev-list --left-right --count \
+  agent/initial-workshop-platform...workshop/reference-solutions
+```
+
+The second number may be nonzero because it contains answer material. The first
+number must be zero.
 
 After the first successful reference-machine setup, review and commit the
-generated `lake-manifest.json` and `uv.lock`, then repeat acceptance from a
-clean clone.
+generated `lake-manifest.json` and `uv.lock`, then repeat acceptance from clean
+clones/worktrees.
 
 ## Falling-behind policy
 
@@ -94,7 +120,8 @@ The curriculum deliberately marks:
 
 When time expires, participants should let the scenario loader back up their
 current work and move with the room. Later demos do not depend on their local
-proof being complete.
+proof being complete. Point participants to
+[`../curriculum/CATCH_UP.md`](../curriculum/CATCH_UP.md) when necessary.
 
 Offer progressively stronger help:
 
@@ -103,6 +130,9 @@ Offer progressively stronger help:
 3. suggest the proof shape or tactic category;
 4. show a smaller analogous proof;
 5. only after the session, point to the reference-solutions branch.
+
+For tooling errors, use [`participant-debugging.md`](participant-debugging.md)
+before exposing an answer.
 
 ## Demo policy
 
@@ -125,7 +155,10 @@ uncertainty contract and its universal Lean theorem.
 ### Gemini demo
 
 Use the live Gemini/agent path only after end-to-end testing on the exact event
-environment. Prepare a deterministic fallback consisting of:
+environment. The event configuration must explicitly name the tested Gemini
+model; the repository deliberately has no stale hard-coded default.
+
+Prepare a deterministic fallback consisting of:
 
 1. one known-invalid Lean candidate;
 2. the corresponding real Lean diagnostic;
@@ -133,6 +166,9 @@ environment. Prepare a deterministic fallback consisting of:
 4. a successful local checker result.
 
 The audience must see the same trust separation even if cloud access fails.
+The Gemini tutor may inspect the active participant file and shared scenario
+models, but it receives no arbitrary shell tool and cannot declare itself
+verified.
 
 ## Event infrastructure
 

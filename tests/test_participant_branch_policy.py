@@ -49,7 +49,8 @@ LEGACY_PROTOTYPE_PATHS = {
 
 
 def test_reference_solution_directories_are_absent() -> None:
-    assert not (REPOSITORY_ROOT / "VerifiedAgenticWorkshop" / "Solutions").exists()
+    solutions = REPOSITORY_ROOT / "VerifiedAgenticWorkshop" / "Solutions"
+    assert not solutions.exists()
     assert not (REPOSITORY_ROOT / "solutions").exists()
 
 
@@ -83,15 +84,20 @@ def test_numbered_curriculum_is_complete() -> None:
 
 
 def test_optional_stretch_theorems_do_not_block_baseline_starters() -> None:
-    lifecycle = (
-        REPOSITORY_ROOT / "exercises" / "lean" / "01_LifecycleResources.lean.template"
-    ).read_text(encoding="utf-8")
-    behavior_tree = (
+    lifecycle_path = (
+        REPOSITORY_ROOT
+        / "exercises"
+        / "lean"
+        / "01_LifecycleResources.lean.template"
+    )
+    behavior_tree_path = (
         REPOSITORY_ROOT
         / "exercises"
         / "lean"
         / "02_BehaviorTreeRefinement.lean.template"
-    ).read_text(encoding="utf-8")
+    )
+    lifecycle = lifecycle_path.read_text(encoding="utf-8")
+    behavior_tree = behavior_tree_path.read_text(encoding="utf-8")
 
     assert "theorem run_preserves_safety" not in lifecycle
     assert "theorem corrected_fsm_trace_matches_bt" not in behavior_tree
@@ -108,7 +114,10 @@ def test_legacy_prototype_material_is_absent() -> None:
 
 def test_playground_contains_only_runtime_guidance_when_clean() -> None:
     playground = REPOSITORY_ROOT / "playground"
+    ignored_runtime = {"current", "backups"}
     tracked_like_entries = {
-        path.name for path in playground.iterdir() if path.name not in {"current", "backups"}
+        path.name
+        for path in playground.iterdir()
+        if path.name not in ignored_runtime
     }
     assert tracked_like_entries == {"README.md"}

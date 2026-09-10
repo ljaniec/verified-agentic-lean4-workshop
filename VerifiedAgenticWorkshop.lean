@@ -1,7 +1,3 @@
-import VerifiedAgenticWorkshop.Robotics.Corridor
-import VerifiedAgenticWorkshop.Robotics.Reservations
-import VerifiedAgenticWorkshop.Robotics.DeadlockDetector
-import VerifiedAgenticWorkshop.Workshop.CopilotExamples
 import VerifiedAgenticWorkshop.Scenarios.LifecycleResources
 import VerifiedAgenticWorkshop.Scenarios.BehaviorTreeRefinement
 import VerifiedAgenticWorkshop.Scenarios.VDA5050Trace

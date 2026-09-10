@@ -24,8 +24,20 @@ than success reporting, driving, or requesting a plan.
 
 ## Inspect
 
-Open the Python and Lean files for the active `bt` scenario. Locate the
-observation type and the reference decision function.
+Open:
+
+```text
+playground/current/current.py
+playground/current/Current.lean
+```
+
+In Python, locate `MISSION_TREE`, `Branch`, `tick_fallback`, and `bt_decision`.
+The starter now models the branch ordering explicitly instead of hiding the
+reference policy inside another handwritten `if` chain.
+
+In Lean, compare the same ideas in the shared Behavior Tree scenario model.
+Focus on observable one-tick decisions, not syntax differences between the two
+languages.
 
 ## Predict before running
 
@@ -45,5 +57,11 @@ omits `RUNNING`, asynchronous nodes, the blackboard, and concurrent subtrees.
 
 ## Done when
 
-You can state the priority order of the four decisions without reading the
-implementation.
+You can state the priority order of the four decisions and explain how the
+Fallback ordering implements it.
+
+## Recovery without the answer
+
+If the tree notation is unfamiliar, ignore the implementation language for one
+minute and read the branches top-to-bottom: the first guard that succeeds chooses
+its action; if none succeeds, the default is `REQUEST_PLAN`.

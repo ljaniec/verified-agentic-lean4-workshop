@@ -15,20 +15,33 @@ Open:
 playground/current/current.py
 ```
 
-Implement or repair the participant FSM function.
+Implement only:
 
-## Constraint
+```text
+fsm_decision
+```
 
-Do not change the Behavior Tree reference to match the rewrite. The reference
-policy is the specification for this exercise.
+Keep the counterexample from Task 02.2. Do not change the Behavior Tree
+reference to make the rewrite pass: `MISSION_TREE` is the specification for this
+exercise.
 
 ## Check the finite observation space
 
 The model contains three Boolean observations, so there are only eight possible
-input combinations. After repairing the FSM, compare it against the reference
-for every observation.
+input combinations. The starter already checks the repaired FSM against the
+reference for all of them.
 
-Use the helper already provided by the starter where possible.
+Run:
+
+```bash
+python3 playground/current/current.py
+```
+
+A successful run should reach:
+
+```text
+exercise completed
+```
 
 ## Engineering question
 
@@ -39,8 +52,10 @@ values, and unbounded traces?
 ## Done when
 
 The repaired Python FSM returns the same observable decision as the reference
-for all eight observations.
+for all eight observations and the Python exercise completes successfully.
 
-## Hint
+## Recovery without the answer
 
-The fix is about **priority**, not about adding a new action.
+Write the reference priority order on paper before editing the function. Then
+make the handwritten checks follow that same order. The fix is about priority,
+not about adding a new action or weakening the comparison.

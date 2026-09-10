@@ -16,6 +16,9 @@ You do not need the completed answers to continue with later stages: stretch
 proofs are optional, unfinished work is backed up automatically, and the final
 sections are facilitator-led demos.
 
+If you fall behind, follow [`CATCH_UP.md`](CATCH_UP.md). For error diagnosis,
+see [`../docs/participant-debugging.md`](../docs/participant-debugging.md).
+
 ## Timing
 
 | Time | Stage | Mode |
@@ -29,7 +32,9 @@ sections are facilitator-led demos.
 | 87–90 min | `06-wrap-up` | guided |
 
 The stretch tasks at the end of the lifecycle and Behavior Tree stages may be
-skipped without affecting later demos.
+skipped without affecting later demos. They are intentionally **not**
+predeclared in the baseline Lean starters, so skipping them cannot make the
+required scenario check fail.
 
 ## Common commands
 
@@ -60,9 +65,13 @@ Check exactly those files:
 ./workshop scenario check
 ```
 
-A failing check is expected while an exercise is incomplete. Python is used to
-execute concrete examples and counterexamples; Lean is used to check universal
-claims.
+A failing full check is expected while baseline TODOs are incomplete. For an
+intermediate Lean task, use the editor goal/error state to confirm that the
+specific declaration you just edited is solved; later TODOs may still keep the
+whole file incomplete.
+
+Python is used to execute concrete examples and counterexamples; Lean is used
+to check universal claims.
 
 ## Workshop rule
 

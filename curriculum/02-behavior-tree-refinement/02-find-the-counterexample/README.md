@@ -14,8 +14,8 @@ it tests observations with the reference Behavior Tree policy.
 
 ## Python task
 
-Construct the smallest observation that makes the two implementations disagree.
-Use Python to confirm the mismatch.
+Construct a small observation that makes the two implementations disagree. Use
+Python to confirm the mismatch.
 
 ```python
 obs = Observation(...)
@@ -39,8 +39,8 @@ Complete:
 buggy_refactoring_counterexample
 ```
 
-The shared scenario already defines the concrete `cancelWhilePathAvailable`
-observation. This is a fully decidable concrete proposition, so try a direct
+The shared scenario defines the concrete `cancelWhilePathAvailable` observation
+used by this theorem. This is a fully decidable proposition, so try a direct
 computational proof before doing case analysis.
 
 A useful candidate is:
@@ -49,21 +49,32 @@ A useful candidate is:
 by decide
 ```
 
-Compile it; do not treat the suggestion itself as the certificate.
+Compile/check the declaration; do not treat the suggestion itself as the
+certificate.
+
+### Important: this is an intermediate checkpoint
+
+`corrected_fsm_matches_bt` is still intentionally unfinished. The whole Lean
+file is therefore not expected to pass `./workshop scenario check` yet. Confirm
+in the Lean editor that the concrete counterexample theorem itself has no
+remaining goal/error. The full scenario check comes after Task 02.4.
 
 ## Why this matters
 
-A refactor may pass many ordinary examples while still change behavior on one
+A refactor may pass many ordinary examples while still changing behavior on one
 combination of events. The counterexample identifies the implicit priority rule
 that the rewrite violated.
 
 ## Done when
 
 - you have one concrete Python observation where the policies disagree;
-- the corresponding concrete Lean counterexample theorem compiles;
+- the Lean editor reports no remaining goal/error for
+  `buggy_refactoring_counterexample`;
 - you can explain why the mismatch occurs.
 
-## Hint
+## Recovery without the answer
 
 Look for a case where driving is possible but another branch should have higher
-priority.
+priority. If the Lean proof is the only blocker, remember that this theorem is
+about one fully concrete decidable proposition; do not start the general Boolean
+case split yet.

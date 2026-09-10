@@ -15,6 +15,7 @@ from typing import Final
 _REPOSITORY_ROOT: Final[Path] = Path(__file__).resolve().parents[3]
 _ALLOWED_ROOTS: Final[tuple[Path, ...]] = (
     _REPOSITORY_ROOT / "playground",
+    _REPOSITORY_ROOT / "VerifiedAgenticWorkshop" / "Scenarios",
     _REPOSITORY_ROOT / "VerifiedAgenticWorkshop" / "Workshop",
 )
 _FORBIDDEN_PATTERN: Final[re.Pattern[str]] = re.compile(
@@ -53,7 +54,8 @@ def _resolve_lean_file(relative_path: str) -> Path:
         raise ValueError("Only .lean files are accepted.")
     if not any(candidate.is_relative_to(root.resolve()) for root in _ALLOWED_ROOTS):
         raise ValueError(
-            "The file must be inside playground/ or "
+            "The file must be inside playground/, "
+            "VerifiedAgenticWorkshop/Scenarios/, or "
             "VerifiedAgenticWorkshop/Workshop/."
         )
     if not candidate.is_file():

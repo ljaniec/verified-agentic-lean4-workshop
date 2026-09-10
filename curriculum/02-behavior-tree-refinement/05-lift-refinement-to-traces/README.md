@@ -6,7 +6,26 @@
 ## Objective
 
 Show how a pointwise behavioral-equivalence theorem induces equality of finite
-observable decision traces.
+observable decision traces without making the optional proof block the main
+workshop path.
+
+## Before you start
+
+The baseline starter intentionally does **not** predeclare this theorem. After
+Tasks 02.1–02.4 are complete, `./workshop scenario check` should already pass.
+Continue here only if time remains.
+
+## Add this theorem
+
+Insert the following declaration before the final namespace `end` in
+`playground/current/Current.lean`:
+
+```lean
+theorem corrected_fsm_trace_matches_bt (observations : List Observation) :
+    decisionTrace fsmDecision observations =
+      decisionTrace btDecision observations := by
+  -- prove the stretch theorem here
+```
 
 ## Idea
 
@@ -14,36 +33,39 @@ If both implementations make the same decision for every observation, mapping
 either implementation over the same finite observation list should produce the
 same decision list.
 
-The theorem has the conceptual form:
-
 ```text
 pointwise equivalence
     ⇒
 finite trace equivalence
 ```
 
-## Task
-
-Complete the trace theorem already present in the Lean starter or derive it from
-your pointwise theorem.
-
 Possible approaches include:
 
 - induction over the observation list;
-- simplifying a `map` equality using the pointwise theorem.
+- simplifying the mapped-list equality using `corrected_fsm_matches_bt`.
 
 ## Why this matters
 
 A real refactoring contract is usually about externally observable executions,
-not just the source-code structure. This small theorem is the workshop's bridge
+not just source-code structure. This small theorem is the workshop's bridge
 toward trace refinement, simulation relations, and richer behavioral semantics.
+
+## Check
+
+If you add the theorem, run:
+
+```bash
+./workshop scenario check
+```
 
 ## Done when
 
-The trace theorem compiles, or you can explain why pointwise equality suffices
-for this deliberately stateless teaching model.
+Either the trace theorem compiles, or you can explain why pointwise equality is
+sufficient for this deliberately stateless teaching model.
 
-## Timebox
+## Recovery / falling behind
 
-Move to the demos when the facilitator calls time. The trace result is useful,
-but it is not required to understand the next stages.
+Move to the demos when the facilitator calls time. If your optional theorem is
+unfinished, preserve the attempt in your editor or backup and remove the
+incomplete addition if you want to retain a clean baseline scenario. Starting
+the next scenario automatically backs up the current pair.

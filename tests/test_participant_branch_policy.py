@@ -67,7 +67,9 @@ def test_numbered_curriculum_is_complete() -> None:
     assert EXPECTED_STAGES <= actual_stages
 
     missing_readmes = [
-        task for task in sorted(EXPECTED_TASKS) if not (CURRICULUM / task / "README.md").is_file()
+        task
+        for task in sorted(EXPECTED_TASKS)
+        if not (CURRICULUM / task / "README.md").is_file()
     ]
     assert not missing_readmes, f"missing task README files: {missing_readmes}"
 

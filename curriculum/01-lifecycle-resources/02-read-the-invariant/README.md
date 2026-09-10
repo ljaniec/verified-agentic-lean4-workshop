@@ -60,6 +60,13 @@ simp [Safe, activeState, buggyStep]
 
 Do not paste a candidate without checking what it proves.
 
+### Important: this is an intermediate checkpoint
+
+The later `step_preserves_safety` TODO is still intentionally unfinished, so the
+whole file is not expected to pass `./workshop scenario check` yet. Use the Lean
+editor to verify that each theorem you just edited has no remaining goal/error
+at that declaration. The full scenario check comes after Task 01.5.
+
 ## Why both directions matter
 
 `Active → sensorOpen` says what an active node must own. `sensorOpen → Active`
@@ -70,10 +77,12 @@ requirements.
 
 - you can explain why `Inactive + sensorOpen` is rejected even with the actuator
   disabled;
-- the `initial_safe` and concrete buggy-deactivation theorems compile in your
-  active Lean file.
+- the Lean editor reports no remaining goal/error for `initial_safe` and
+  `buggy_deactivate_breaks_safety`.
 
-## Hint
+## Recovery without the answer
 
-These first two goals are intentionally computational. Save the exhaustive case
-analysis for the general one-step preservation theorem later.
+If one of the two concrete goals remains open, unfold only the definitions named
+in that theorem and simplify. Do not start the large state/event case split yet;
+that belongs to Task 01.5. If the room moves on, leave the later TODOs alone and
+continue with the Python repair.

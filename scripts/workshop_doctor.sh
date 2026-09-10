@@ -59,10 +59,26 @@ else
 fi
 
 if [[ "$LEAN_ONLY" -eq 0 ]]; then
+  printf '\nOptional Gemini configuration\n'
+  gemini_key=0
+  gemini_model=0
+
   if [[ -f .env ]] && grep -Eq '^GOOGLE_API_KEY=.+$' .env; then
+    gemini_key=1
     printf 'OK   %-12s configured\n' 'Gemini key'
   else
-    printf 'INFO %-12s optional; copy .env.example to .env later\n' 'Gemini key'
+    printf 'INFO %-12s optional; configure only for the tested agent demo\n' 'Gemini key'
+  fi
+
+  if [[ -f .env ]] && grep -Eq '^GOOGLE_MODEL=.+$' .env; then
+    gemini_model=1
+    printf 'OK   %-12s configured\n' 'Gemini model'
+  else
+    printf 'INFO %-12s no tested event model selected yet\n' 'Gemini model'
+  fi
+
+  if [[ "$gemini_key" -ne "$gemini_model" ]]; then
+    printf 'WARN %-12s key and model should be configured together\n' 'Gemini config'
   fi
 fi
 

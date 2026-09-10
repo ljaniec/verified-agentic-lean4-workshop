@@ -11,11 +11,15 @@ open VerifiedAgenticWorkshop.Scenarios.BehaviorTreeRefinement
 The reference BT gives cancellation higher priority than navigation. The buggy
 replacement checks `pathAvailable` first.
 
-The numbered curriculum assigns these obligations:
+The baseline starter contains only the proof obligations required for the main
+exercise:
 
 1. prove the concrete counterexample after reproducing it in Python;
-2. prove observational equivalence of the corrected FSM and reference policy;
-3. optionally lift pointwise equivalence to finite observable traces.
+2. prove observational equivalence of the corrected FSM and reference policy.
+
+Task 02.5 is an optional stretch task. It asks you to add a trace-level theorem
+after the baseline scenario already passes, so skipping it does not block the
+main workshop path.
 -/
 
 theorem buggy_refactoring_counterexample :
@@ -26,11 +30,5 @@ theorem buggy_refactoring_counterexample :
 theorem corrected_fsm_matches_bt (observation : Observation) :
     fsmDecision observation = btDecision observation := by
   -- TODO: curriculum Task 02.4
-
-/-- Stretch task: the same observations produce the same finite decision trace. -/
-theorem corrected_fsm_trace_matches_bt (observations : List Observation) :
-    decisionTrace fsmDecision observations =
-      decisionTrace btDecision observations := by
-  -- TODO: curriculum Task 02.5
 
 end WorkshopExercise.BehaviorTreeRefinement

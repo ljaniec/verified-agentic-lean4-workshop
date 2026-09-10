@@ -33,7 +33,11 @@ Then follow the numbered participant curriculum:
 
 The curriculum contains one folder per stage and one subfolder per concrete
 task or demo step, with exact commands, expected observations, non-spoiling
-hints, completion criteria, and recovery instructions.
+hints, completion criteria, and recovery guidance.
+
+If you fall behind, use [`curriculum/CATCH_UP.md`](curriculum/CATCH_UP.md). If a
+command fails unexpectedly, start with
+[`docs/participant-debugging.md`](docs/participant-debugging.md).
 
 ## Workshop path
 
@@ -71,7 +75,9 @@ Check exactly that pair with:
 ```
 
 Participant work is automatically backed up under `playground/backups/` before
-another starter replaces it.
+another starter replaces it. Optional trace-level stretch theorems are not
+predeclared in the baseline starters, so skipping them cannot block completion
+of the required scenario.
 
 ## Reference solutions are intentionally absent
 
@@ -112,8 +118,14 @@ Gemini proposal
     -> repair
 ```
 
-The agent receives no arbitrary shell tool and must not report a proof as
-verified unless the actual Lean checker succeeds.
+The agent receives no arbitrary shell tool. It may inspect the active
+participant Lean file and the shared workshop scenario models, and it must not
+report a proof as verified unless the actual Lean checker succeeds.
+
+For the current API-key prototype, copy `.env.example` to `.env` and set both
+`GOOGLE_API_KEY` and `GOOGLE_MODEL` before starting the agent. The model name is
+intentionally not hard-coded: the exact event model must be selected and tested
+end to end before the workshop configuration is frozen.
 
 ## Lean-only setup
 
@@ -155,5 +167,6 @@ scripts/                    implementation behind ./workshop
 
 For workshop execution, start with the
 [participant curriculum](curriculum/README.md). Development notes remain in the
-[facilitator guide](docs/facilitator-guide.md) and
+[facilitator guide](docs/facilitator-guide.md),
+[rehearsal checklist](docs/facilitator-rehearsal.md), and
 [setup design](docs/setup-design.md).

@@ -1,0 +1,100 @@
+from __future__ import annotations
+
+from dataclasses import dataclass, replace
+from enum import Enum, auto
+from typing import TypeAlias
+
+
+@dataclass(frozen=True)
+class OrderMessage:
+    order_id: int
+    order_update_id: int
+
+
+@dataclass(frozen=True)
+class StateMessage:
+    order_id: int
+    last_node_sequence_id: int
+
+
+Message: TypeAlias = OrderMessage | StateMessage
+
+
+@dataclass(frozen=True)
+class Monitor:
+    current_order: int | None = None
+    last_order_update_id: int = 0
+    last_node_sequence_id: int = 0
+
+
+class Violation(Enum):
+    FIRST_ORDER_UPDATE_MUST_BE_ZERO = auto()
+    ORDER_UPDATE_NOT_INCREASING = auto()
+    NEW_ORDER_MUST_START_AT_ZERO = auto()
+    STATE_WITHOUT_ORDER = auto()
+    STATE_ORDER_MISMATCH = auto()
+    NODE_SEQUENCE_REGRESSED = auto()
+
+
+@dataclass(frozen=True)
+class StepResult:
+    monitor: Monitor | None
+    violation: Violation | None
+
+    @property
+    def accepted(self) -> bool:
+        return self.violation is None
+
+
+@dataclass(frozen=True)
+class TraceResult:
+    monitor: Monitor | None
+    violation: Violation | None
+    rejected_index: int | None
+
+
+def check_step(monitor: Monitor, message: Message) -> StepResult:
+    """TODO: return either the next monitor or the exact semantic violation."""
+    raise NotImplementedError
+
+
+def run_detailed(trace: list[Message]) -> TraceResult:
+    monitor = Monitor()
+    for index, message in enumerate(trace):
+        result = check_step(monitor, message)
+        if not result.accepted:
+            return TraceResult(None, result.violation, index)
+        assert result.monitor is not None
+        monitor = result.monitor
+    return TraceResult(monitor, None, None)
+
+
+def main() -> None:
+    valid_trace: list[Message] = [
+        OrderMessage(7, 0),
+        StateMessage(7, 2),
+        OrderMessage(7, 1),
+        StateMessage(7, 4),
+    ]
+    stale_update_trace: list[Message] = [
+        OrderMessage(7, 0),
+        OrderMessage(7, 0),
+    ]
+    regressing_state_trace: list[Message] = [
+        OrderMessage(7, 0),
+        StateMessage(7, 4),
+        StateMessage(7, 3),
+    ]
+
+    assert run_detailed(valid_trace) == TraceResult(Monitor(7, 1, 4), None, None)
+    assert run_detailed(stale_update_trace) == TraceResult(
+        None, Violation.ORDER_UPDATE_NOT_INCREASING, 1
+    )
+    assert run_detailed(regressing_state_trace) == TraceResult(
+        None, Violation.NODE_SEQUENCE_REGRESSED, 2
+    )
+    print("exercise completed")
+
+
+if __name__ == "__main__":
+    main()

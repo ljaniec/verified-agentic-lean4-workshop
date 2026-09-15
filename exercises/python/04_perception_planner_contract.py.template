@@ -1,0 +1,62 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+from enum import Enum, auto
+
+
+@dataclass(frozen=True)
+class Interval:
+    lo: int
+    hi: int
+
+    def contains(self, point: int) -> bool:
+        return self.lo <= point <= self.hi
+
+
+class PlannerDecision(Enum):
+    ACCEPT = auto()
+    FALLBACK = auto()
+
+
+def separated(path: Interval, obstacle: Interval) -> bool:
+    """TODO: decide whether the two closed intervals are disjoint."""
+    raise NotImplementedError
+
+
+def decide_plan(path: Interval, obstacle: Interval) -> PlannerDecision:
+    """TODO: accept only a separated path; otherwise choose fallback."""
+    raise NotImplementedError
+
+
+def decide_from_point_estimate(path: Interval, estimate: int) -> PlannerDecision:
+    """TODO: implement the weaker point-estimate baseline."""
+    raise NotImplementedError
+
+
+def accepted_plan_is_collision_free(path: Interval, obstacle: Interval) -> bool:
+    """TODO: exhaustively validate the accepted finite integer intervals."""
+    raise NotImplementedError
+
+
+def main() -> None:
+    separated_path = Interval(0, 4)
+    separated_obstacle = Interval(7, 10)
+    overlapping_path = Interval(0, 8)
+    overlapping_obstacle = Interval(6, 10)
+    point_estimate = 10
+
+    assert decide_plan(separated_path, separated_obstacle) is PlannerDecision.ACCEPT
+    assert (
+        decide_plan(overlapping_path, overlapping_obstacle)
+        is PlannerDecision.FALLBACK
+    )
+    assert (
+        decide_from_point_estimate(overlapping_path, point_estimate)
+        is PlannerDecision.ACCEPT
+    )
+    assert accepted_plan_is_collision_free(separated_path, separated_obstacle)
+    print("exercise completed")
+
+
+if __name__ == "__main__":
+    main()

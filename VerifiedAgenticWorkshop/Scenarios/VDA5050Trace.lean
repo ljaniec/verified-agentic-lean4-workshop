@@ -1,0 +1,117 @@
+import Mathlib
+
+namespace VerifiedAgenticWorkshop.Scenarios.VDA5050Trace
+
+/-!
+A deliberately small teaching profile inspired by VDA 5050 3.0. It is not a
+complete implementation of the standard. It demonstrates the gap between
+validating one message and validating a temporal message trace.
+-/
+
+structure OrderMessage where
+  orderId : Nat
+  orderUpdateId : Nat
+  deriving DecidableEq, Repr
+
+structure StateMessage where
+  orderId : Nat
+  lastNodeSequenceId : Nat
+  deriving DecidableEq, Repr
+
+inductive Message where
+  | order (message : OrderMessage)
+  | state (message : StateMessage)
+  deriving DecidableEq, Repr
+
+structure Monitor where
+  currentOrder : Option Nat
+  lastOrderUpdateId : Nat
+  lastNodeSequenceId : Nat
+  deriving DecidableEq, Repr
+
+/-- A typed explanation of why the first invalid message was rejected. -/
+inductive Violation where
+  | firstOrderUpdateMustBeZero
+  | orderUpdateNotIncreasing
+  | newOrderMustStartAtZero
+  | stateWithoutOrder
+  | stateOrderMismatch
+  | nodeSequenceRegressed
+  deriving DecidableEq, Repr
+
+def initial : Monitor :=
+  ⟨none, 0, 0⟩
+
+/--
+The local teaching policy checks new-order initialization, increasing updates,
+matching order identifiers, and nondecreasing reported node progress.
+-/
+def checkStep (monitor : Monitor) (message : Message) : Except Violation Monitor :=
+  match message with
+  | .order orderMessage =>
+      match monitor.currentOrder with
+      | none =>
+          if orderMessage.orderUpdateId = 0 then
+            .ok ⟨some orderMessage.orderId, 0, 0⟩
+          else
+            .error .firstOrderUpdateMustBeZero
+      | some currentOrder =>
+          if orderMessage.orderId = currentOrder then
+            if monitor.lastOrderUpdateId < orderMessage.orderUpdateId then
+              .ok { monitor with
+                lastOrderUpdateId := orderMessage.orderUpdateId }
+            else
+              .error .orderUpdateNotIncreasing
+          else if orderMessage.orderUpdateId = 0 then
+            .ok ⟨some orderMessage.orderId, 0, 0⟩
+          else
+            .error .newOrderMustStartAtZero
+  | .state stateMessage =>
+      match monitor.currentOrder with
+      | none => .error .stateWithoutOrder
+      | some currentOrder =>
+          if stateMessage.orderId = currentOrder then
+            if monitor.lastNodeSequenceId ≤ stateMessage.lastNodeSequenceId then
+              .ok { monitor with
+                lastNodeSequenceId := stateMessage.lastNodeSequenceId }
+            else
+              .error .nodeSequenceRegressed
+          else
+            .error .stateOrderMismatch
+
+/-- Compatibility projection used by the smallest exercise. -/
+def step (monitor : Monitor) (message : Message) : Option Monitor :=
+  match checkStep monitor message with
+  | .ok next => some next
+  | .error _ => none
+
+/-- Check a full trace while preserving the first semantic violation. -/
+def runDetailed : Monitor → List Message → Except Violation Monitor
+  | monitor, [] => .ok monitor
+  | monitor, message :: rest =>
+      match checkStep monitor message with
+      | .ok next => runDetailed next rest
+      | .error violation => .error violation
+
+/-- Compatibility projection that accepts or rejects without diagnostics. -/
+def run (monitor : Monitor) (messages : List Message) : Option Monitor :=
+  match runDetailed monitor messages with
+  | .ok next => some next
+  | .error _ => none
+
+def validTrace : List Message :=
+  [ .order ⟨7, 0⟩,
+    .state ⟨7, 2⟩,
+    .order ⟨7, 1⟩,
+    .state ⟨7, 4⟩ ]
+
+def staleUpdateTrace : List Message :=
+  [ .order ⟨7, 0⟩,
+    .order ⟨7, 0⟩ ]
+
+def regressingStateTrace : List Message :=
+  [ .order ⟨7, 0⟩,
+    .state ⟨7, 4⟩,
+    .state ⟨7, 3⟩ ]
+
+end VerifiedAgenticWorkshop.Scenarios.VDA5050Trace

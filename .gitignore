@@ -1,0 +1,42 @@
+# Lean and Lake
+.lake/
+*.olean
+*.ilean
+*.c
+*.o
+
+# Lean Copilot model cache links and local artifacts
+.lean-copilot/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Workshop runtime artifacts
+artifacts/
+logs/
+workshop-output/
+playground/current/
+playground/backups/
+
+# Editors and operating systems
+.DS_Store
+.idea/
+*.swp
+*.swo

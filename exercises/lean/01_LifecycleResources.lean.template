@@ -1,0 +1,40 @@
+import VerifiedAgenticWorkshop.Scenarios.LifecycleResources
+import LeanCopilot
+
+namespace WorkshopExercise.LifecycleResources
+
+open VerifiedAgenticWorkshop.Scenarios.LifecycleResources
+
+/-!
+# Exercise 1: lifecycle + sensor + log + actuator resources
+
+The baseline starter contains only the proof obligations required to complete
+the main lifecycle stage:
+
+1. prove that the initial state satisfies the application invariant;
+2. prove the concrete buggy-deactivation counterexample;
+3. prove that the corrected `step` preserves `Safe` for one arbitrary event.
+
+Task 01.6 is an optional stretch task. It asks you to add a separate finite-trace
+theorem after the baseline scenario already passes, so skipping the stretch task
+does not leave an unresolved theorem in this file.
+
+Try `suggest_tactics`, `search_proof`, `select_premises`, `simp`, and explicit
+case analysis. Do not use `sorry`, `admit`, new axioms, or trust bypasses.
+-/
+
+theorem initial_safe : Safe initial := by
+  -- TODO: curriculum Task 01.2
+
+theorem buggy_deactivate_breaks_safety :
+    Safe activeState ∧ ¬ Safe (buggyStep activeState .deactivate) := by
+  -- TODO: curriculum Task 01.2
+
+theorem step_preserves_safety
+    (state : State)
+    (event : Event)
+    (safe : Safe state) :
+    Safe (step state event) := by
+  -- TODO: curriculum Task 01.5
+
+end WorkshopExercise.LifecycleResources

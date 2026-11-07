@@ -76,13 +76,21 @@ def buggy_fsm_decision(observation: Observation) -> Decision:
 
 
 def counterexample_observation() -> Observation:
-    """TODO Task 02.2: construct an observation where the policies disagree."""
-    raise NotImplementedError
+    return Observation(
+        cancel_requested=True,
+        goal_reached=False,
+        path_available=True,
+    )
 
 
 def fsm_decision(observation: Observation) -> Decision:
-    """TODO Task 02.3: repair the handwritten FSM priority order."""
-    raise NotImplementedError
+    if observation.cancel_requested:
+        return Decision.STOP_AND_CANCEL
+    if observation.goal_reached:
+        return Decision.REPORT_SUCCESS
+    if observation.path_available:
+        return Decision.DRIVE
+    return Decision.REQUEST_PLAN
 
 
 def decision_trace(
@@ -98,11 +106,10 @@ def all_observations() -> list[Observation]:
 def main() -> None:
     counterexample = counterexample_observation()
     trace = [Observation(False, False, True), counterexample]
-
     assert buggy_fsm_decision(counterexample) != bt_decision(counterexample)
     assert all(fsm_decision(obs) == bt_decision(obs) for obs in all_observations())
     assert decision_trace(fsm_decision, trace) == decision_trace(bt_decision, trace)
-    print("exercise completed")
+    print("bt refinement checkpoint passed")
 
 
 if __name__ == "__main__":

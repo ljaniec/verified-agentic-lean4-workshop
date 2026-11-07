@@ -12,6 +12,10 @@ theorem buggy_refactoring_counterexample :
 
 theorem corrected_fsm_matches_bt (observation : Observation) :
     fsmDecision observation = btDecision observation := by
-  -- TODO: prove equivalence for every Boolean observation
+  rcases observation with ⟨cancelRequested, goalReached, pathAvailable⟩
+  cases cancelRequested <;>
+    cases goalReached <;>
+    cases pathAvailable <;>
+    rfl
 
 end WorkshopExercise.BehaviorTreeRefinement

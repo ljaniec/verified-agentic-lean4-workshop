@@ -54,8 +54,32 @@ class TraceResult:
 
 
 def check_step(monitor: Monitor, message: Message) -> StepResult:
-    """TODO: return either the next monitor or the exact semantic violation."""
-    raise NotImplementedError
+    if isinstance(message, OrderMessage):
+        if monitor.current_order is None:
+            if message.order_update_id != 0:
+                return StepResult(None, Violation.FIRST_ORDER_UPDATE_MUST_BE_ZERO)
+            return StepResult(Monitor(current_order=message.order_id), None)
+
+        if message.order_id == monitor.current_order:
+            if message.order_update_id <= monitor.last_order_update_id:
+                return StepResult(None, Violation.ORDER_UPDATE_NOT_INCREASING)
+            return StepResult(
+                replace(monitor, last_order_update_id=message.order_update_id), None
+            )
+
+        if message.order_update_id != 0:
+            return StepResult(None, Violation.NEW_ORDER_MUST_START_AT_ZERO)
+        return StepResult(Monitor(current_order=message.order_id), None)
+
+    if monitor.current_order is None:
+        return StepResult(None, Violation.STATE_WITHOUT_ORDER)
+    if message.order_id != monitor.current_order:
+        return StepResult(None, Violation.STATE_ORDER_MISMATCH)
+    if message.last_node_sequence_id < monitor.last_node_sequence_id:
+        return StepResult(None, Violation.NODE_SEQUENCE_REGRESSED)
+    return StepResult(
+        replace(monitor, last_node_sequence_id=message.last_node_sequence_id), None
+    )
 
 
 def run_detailed(trace: list[Message]) -> TraceResult:
@@ -93,7 +117,7 @@ def main() -> None:
     assert run_detailed(regressing_state_trace) == TraceResult(
         None, Violation.NODE_SEQUENCE_REGRESSED, 2
     )
-    print("exercise completed")
+    print("vda trace checkpoint passed")
 
 
 if __name__ == "__main__":

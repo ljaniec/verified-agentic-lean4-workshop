@@ -8,6 +8,6 @@ open VerifiedAgenticWorkshop.Scenarios.VDA5050Trace
 theorem stale_update_diagnostic :
     runDetailed initial staleUpdateTrace =
       .error .orderUpdateNotIncreasing := by
-  -- TODO: prove this concrete temporal diagnostic
+  decide
 
 end WorkshopExercise.VDA5050Trace

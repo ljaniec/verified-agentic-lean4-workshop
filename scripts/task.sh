@@ -9,6 +9,7 @@ usage() {
 Usage: ./workshop task <command> [options]
 
 Commands:
+  begin                Fetch/switch to the first checkpoint and start it.
   list                 Show all 45-minute checkpoint branches.
   status               Show the current branch/task metadata.
   start                Prepare the current task and print WORKSHOP_TASK.md.
@@ -103,10 +104,34 @@ clean_active() {
   fi
 }
 
+ensure_local_branch() {
+  local target="$1"
+
+  if git -C "$REPOSITORY_ROOT" show-ref --verify --quiet "refs/heads/$target"; then
+    return
+  fi
+
+  if ! git -C "$REPOSITORY_ROOT" show-ref --verify --quiet "refs/remotes/origin/$target"; then
+    log "Fetching checkpoint branch $target"
+    git -C "$REPOSITORY_ROOT" fetch origin       "$target:refs/remotes/origin/$target"
+  fi
+
+  git -C "$REPOSITORY_ROOT" branch --track "$target" "origin/$target" >/dev/null
+}
+
 switch_branch() {
   local target="$1"
   clean_active
+  ensure_local_branch "$target"
   git -C "$REPOSITORY_ROOT" switch "$target"
+}
+
+begin_course() {
+  local first_branch
+  first_branch="$(awk -F '|' '$1 !~ /^#/ { print $3; exit }' "$TASK_TABLE")"
+  [[ -n "$first_branch" ]] || fail "no workshop checkpoint is defined"
+  switch_branch "$first_branch"
+  exec bash "$REPOSITORY_ROOT/scripts/task.sh" start
 }
 
 next_task() {
@@ -136,6 +161,7 @@ command_name="${1:-status}"
 if [[ $# -gt 0 ]]; then shift; fi
 
 case "$command_name" in
+  begin) [[ $# -eq 0 ]] || fail "usage: ./workshop task begin"; begin_course ;;
   list) column -t -s '|' "$TASK_TABLE" 2>/dev/null || cat "$TASK_TABLE" ;;
   status) [[ $# -eq 0 ]] || fail "usage: ./workshop task status"; show_status ;;
   start) [[ $# -eq 0 ]] || fail "usage: ./workshop task start"; start_task ;;

@@ -1,0 +1,22 @@
+import VerifiedAgenticWorkshop.Scenarios.LifecycleResources
+import LeanCopilot
+
+namespace WorkshopExercise.AgentRepair
+
+open VerifiedAgenticWorkshop.Scenarios.LifecycleResources
+
+/-!
+# Agent repair checkpoint
+
+The theorem is intentionally tiny so the workshop can focus on the trust loop,
+not on proof complexity.
+
+First try the deliberately bad candidate `rfl` and run the checker. Then give
+the real Lean diagnostic to your agent and ask for the smallest repair.
+-/
+
+theorem deactivation_from_active_is_safe :
+    Safe (step activeState .deactivate) := by
+  -- TODO: first try rfl, observe Lean reject it, then repair from the diagnostic
+
+end WorkshopExercise.AgentRepair

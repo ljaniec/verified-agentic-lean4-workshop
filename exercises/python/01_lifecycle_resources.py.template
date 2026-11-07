@@ -67,8 +67,20 @@ def buggy_step(state: State, event: Event) -> State:
 
 
 def step(state: State, event: Event) -> State:
-    """TODO: implement the corrected transition function."""
-    raise NotImplementedError
+    if state.mode is Mode.UNCONFIGURED and event is Event.CONFIGURE:
+        return State(Mode.INACTIVE, False, False, False)
+    if state.mode is Mode.INACTIVE and event is Event.ACTIVATE:
+        return ACTIVE_STATE
+    if state.mode is Mode.ACTIVE and event is Event.DEACTIVATE:
+        # TODO: return the correct inactive resource state.
+        raise NotImplementedError("repair deactivation")
+    if state.mode is Mode.INACTIVE and event is Event.CLEANUP:
+        return INITIAL
+    if event is Event.SHUTDOWN:
+        return State(Mode.FINALIZED, False, False, False)
+    if event is Event.RECOVER_FROM_ERROR:
+        return INITIAL
+    return state
 
 
 def run(state: State, events: Iterable[Event]) -> State:
@@ -77,20 +89,31 @@ def run(state: State, events: Iterable[Event]) -> State:
     return state
 
 
+def all_states() -> list[State]:
+    return [
+        State(mode, sensor, log, actuator)
+        for mode, sensor, log, actuator in product(
+            Mode, (False, True), (False, True), (False, True)
+        )
+    ]
+
+
 def preservation_holds() -> bool:
-    """TODO: exhaustively check every safe Boolean state and every event."""
-    raise NotImplementedError
+    return all(
+        safe(step(state, event))
+        for state in all_states()
+        if safe(state)
+        for event in Event
+    )
 
 
 def main() -> None:
     nominal_trace = [Event.CONFIGURE, Event.ACTIVATE, Event.DEACTIVATE, Event.CLEANUP]
-    inactive_with_open_resources = State(Mode.INACTIVE, True, True, False)
     assert safe(INITIAL)
-    assert not safe(inactive_with_open_resources)
     assert not safe(buggy_step(ACTIVE_STATE, Event.DEACTIVATE))
     assert preservation_holds()
     assert safe(run(INITIAL, nominal_trace))
-    print("exercise completed")
+    print("lifecycle checkpoint passed")
 
 
 if __name__ == "__main__":

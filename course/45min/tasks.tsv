@@ -1,0 +1,7 @@
+# id|scenario|task branch|solution branch|next task branch|minutes|title
+00-build||workshop/00-build|workshop/00-build-solution|workshop/01-lifecycle|4|Build and trust boundary
+01-lifecycle|lifecycle|workshop/01-lifecycle|workshop/01-lifecycle-solution|workshop/02-bt-refinement|8|Lifecycle resource invariant
+02-bt-refinement|bt|workshop/02-bt-refinement|workshop/02-bt-refinement-solution|workshop/03-vda-trace|11|Behavior Tree to FSM refinement
+03-vda-trace|vda|workshop/03-vda-trace|workshop/03-vda-trace-solution|workshop/04-uncertainty|6|Temporal trace conformance
+04-uncertainty|uncertainty|workshop/04-uncertainty|workshop/04-uncertainty-solution|workshop/05-agent-loop|6|Perception-planner uncertainty contract
+05-agent-loop|agent|workshop/05-agent-loop|workshop/05-agent-loop-solution||7|Agent proposal, rejection, and repair

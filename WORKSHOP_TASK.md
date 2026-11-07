@@ -1,11 +1,11 @@
-# Task 03 — Temporal Trace Conformance
+# Task 04 — Perception-Planner Uncertainty Contract
 
 **Timebox: 6 minutes**
 
 ## Goal
 
-See why individually valid messages can still form an invalid protocol trace,
-then make Lean certify the exact temporal diagnostic.
+Show that a point estimate can look safe while the certified uncertainty set
+still overlaps the path.
 
 ## Start
 
@@ -13,24 +13,25 @@ then make Lean certify the exact temporal diagnostic.
 ./workshop task start
 ```
 
-The Python monitor is already complete on this checkpoint. Run it once and read
-the first rejected-event diagnostics.
+The executable Python example is already complete.
 
 ## Work
 
-In Lean, complete only:
+Read the concrete values:
 
 ```text
-stale_update_diagnostic
+path          [0, 8]
+point         10
+uncertainty   [6, 10]
 ```
 
-The trace is concrete and decidable. Do not expand this into a full VDA 5050
-formalization.
+Then complete only the Lean theorem
+`point_estimate_can_miss_uncertainty`.
 
 ## Claim boundary
 
-This proves one temporal rule in a teaching profile. It is **not** VDA 5050
-certification.
+The theorem reasons relative to the supplied uncertainty interval. It does not
+prove that the real obstacle is inside that interval.
 
 ## Done
 
@@ -38,5 +39,5 @@ certification.
 ./workshop task check
 ```
 
-Stop at `WORKSHOP_TASK_OK 03-vda-trace`, then run
+Stop at `WORKSHOP_TASK_OK 04-uncertainty`, then run
 `./workshop task next`.

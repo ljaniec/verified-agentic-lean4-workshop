@@ -8,6 +8,6 @@ open VerifiedAgenticWorkshop.Scenarios.PerceptionPlannerContract
 theorem point_estimate_can_miss_uncertainty :
     decideFromPointEstimate overlappingPath misleadingPointEstimate = .accept ∧
       decidePlan overlappingPath overlappingObstacle = .fallback := by
-  -- TODO: prove the concrete mismatch
+  decide
 
 end WorkshopExercise.PerceptionPlannerContract

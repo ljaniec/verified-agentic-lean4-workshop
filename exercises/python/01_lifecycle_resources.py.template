@@ -72,8 +72,7 @@ def step(state: State, event: Event) -> State:
     if state.mode is Mode.INACTIVE and event is Event.ACTIVATE:
         return ACTIVE_STATE
     if state.mode is Mode.ACTIVE and event is Event.DEACTIVATE:
-        # TODO: return the correct inactive resource state.
-        raise NotImplementedError("repair deactivation")
+        return State(Mode.INACTIVE, False, False, False)
     if state.mode is Mode.INACTIVE and event is Event.CLEANUP:
         return INITIAL
     if event is Event.SHUTDOWN:

@@ -32,7 +32,7 @@ def test_45min_course_has_unique_checkpoint_pairs() -> None:
 
 def test_checkpoint_chain_points_to_next_task() -> None:
     rows = _rows()
-    for current, following in zip(rows, rows[1:], strict=True):
+    for current, following in zip(rows, rows[1:]):
         assert current[4] == following[2]
     assert rows[-1][4] == ""
 

@@ -17,6 +17,12 @@ theorem step_preserves_safety
     (event : Event)
     (safe : Safe state) :
     Safe (step state event) := by
-  -- TODO: prove preservation for the repaired transition
+  rcases state with ⟨mode, sensorOpen, logOpen, actuatorEnabled⟩
+  cases mode <;>
+    cases sensorOpen <;>
+    cases logOpen <;>
+    cases actuatorEnabled <;>
+    cases event <;>
+    simp [Safe, step, initial, activeState] at safe ⊢
 
 end WorkshopExercise.LifecycleResources

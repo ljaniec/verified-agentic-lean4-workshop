@@ -1,11 +1,11 @@
-# Task 04 — Perception-Planner Uncertainty Contract
+# Task 05 — Agent Proposal, Rejection, and Repair
 
-**Timebox: 6 minutes**
+**Timebox: 7 minutes**
 
 ## Goal
 
-Show that a point estimate can look safe while the certified uncertainty set
-still overlaps the path.
+Make the trust boundary visible. The model is allowed to be wrong; the verifier
+is not.
 
 ## Start
 
@@ -13,31 +13,45 @@ still overlaps the path.
 ./workshop task start
 ```
 
-The executable Python example is already complete.
+## Guaranteed first failure
 
-## Work
+In `playground/current/Current.lean`, replace the TODO with:
 
-Read the concrete values:
-
-```text
-path          [0, 8]
-point         10
-uncertainty   [6, 10]
+```lean
+rfl
 ```
 
-Then complete only the Lean theorem
-`point_estimate_can_miss_uncertainty`.
-
-## Claim boundary
-
-The theorem reasons relative to the supplied uncertainty interval. It does not
-prove that the real obstacle is inside that interval.
-
-## Done
+Run:
 
 ```bash
 ./workshop task check
 ```
 
-Stop at `WORKSHOP_TASK_OK 04-uncertainty`, then run
-`./workshop task next`.
+Lean must reject the candidate.
+
+## Repair with any agent
+
+Give the real Lean diagnostic to Codex, Claude Code, Gemini, Lean Copilot, or a
+local model. Ask for the **smallest** repair.
+
+For a generic coding agent:
+
+```bash
+./workshop task prompt
+```
+
+The repaired candidate is accepted only when the exact local checker succeeds.
+
+## Done
+
+Stop at:
+
+```text
+WORKSHOP_TASK_OK 05-agent-loop
+```
+
+The lesson is the loop itself:
+
+```text
+proposal → rejection → diagnostic → repair → verification
+```

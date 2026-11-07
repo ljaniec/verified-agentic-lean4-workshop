@@ -72,8 +72,6 @@ start_task() {
     if [[ "$active" != "$SCENARIO" ]]; then
       bash "$REPOSITORY_ROOT/scripts/scenario.sh" start "$SCENARIO"
     fi
-  else
-    bash "$REPOSITORY_ROOT/scripts/quickcheck.sh"
   fi
 
   printf '\n=== WORKSHOP TASK ===\n\n'

@@ -5,35 +5,9 @@ namespace WorkshopExercise.VDA5050Trace
 
 open VerifiedAgenticWorkshop.Scenarios.VDA5050Trace
 
-/-!
-# Demonstration: typed messages are not enough
-
-This is a small teaching profile, not a complete VDA 5050 implementation.
-Prove that the semantic monitor accepts the good trace and rejects two traces
-whose individual messages are well-typed but temporally inconsistent. Then
-show that the diagnostic monitor identifies the exact semantic reason.
--/
-
-theorem valid_trace_accepted :
-    run initial validTrace = some ⟨some 7, 1, 4⟩ := by
-  -- TODO
-
-theorem stale_update_rejected :
-    run initial staleUpdateTrace = none := by
-  -- TODO
-
-theorem regressing_state_rejected :
-    run initial regressingStateTrace = none := by
-  -- TODO
-
 theorem stale_update_diagnostic :
     runDetailed initial staleUpdateTrace =
       .error .orderUpdateNotIncreasing := by
-  -- TODO
-
-theorem regressing_state_diagnostic :
-    runDetailed initial regressingStateTrace =
-      .error .nodeSequenceRegressed := by
-  -- TODO
+  -- TODO: prove this concrete temporal diagnostic
 
 end WorkshopExercise.VDA5050Trace

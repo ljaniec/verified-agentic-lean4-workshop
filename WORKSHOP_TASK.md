@@ -1,11 +1,12 @@
-# Task 01 — Lifecycle Resource Invariant
+# Task 02 — Behavior Tree to FSM Refinement
 
-**Timebox: 8 minutes**
+**Timebox: 11 minutes**
 
 ## Goal
 
-See why changing a lifecycle enum is not enough, repair the concrete transition,
-and prove that the repaired transition preserves the formal resource invariant.
+Find one behavioral regression introduced by a handwritten FSM rewrite, repair
+the rewrite, and prove that the corrected FSM produces the same observable
+decision as the simplified Behavior Tree for every Boolean observation.
 
 ## Start
 
@@ -13,22 +14,14 @@ and prove that the repaired transition preserves the formal resource invariant.
 ./workshop task start
 ```
 
-This loads:
-
-```text
-playground/current/current.py
-playground/current/Current.lean
-```
-
 ## Work
 
-1. In Python, repair the `ACTIVE + DEACTIVATE` branch so it releases the
-   sensor, log, and actuator state.
-2. Run the Python file directly if you want a fast concrete check.
-3. In Lean, complete only `step_preserves_safety`.
-4. Do **not** weaken `Safe` or edit the shared scenario model.
-
-An agent may propose the proof, but it must run the checker.
+1. Read the ordered `MISSION_TREE` in Python. The first matching branch wins.
+2. Implement `counterexample_observation()` so the buggy FSM and BT disagree.
+3. Repair `fsm_decision(...)` without changing the reference tree.
+4. In Lean, complete `corrected_fsm_matches_bt`.
+5. Keep the scope exact: this is a one-decision teaching model, not full
+   BehaviorTree.CPP semantics.
 
 ## Done
 
@@ -39,11 +32,7 @@ An agent may propose the proof, but it must run the checker.
 Stop at:
 
 ```text
-WORKSHOP_TASK_OK 01-lifecycle
+WORKSHOP_TASK_OK 02-bt-refinement
 ```
 
-Then:
-
-```bash
-./workshop task next
-```
+Then run `./workshop task next`.

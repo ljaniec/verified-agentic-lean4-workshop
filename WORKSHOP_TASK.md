@@ -9,12 +9,14 @@ understand the one rule that governs every later task:
 
 > AI can propose. Lean decides what is accepted.
 
-## Run
+## Check
 
 ```bash
-./workshop quickcheck
 ./workshop task check
 ```
+
+This is the fast event preflight; dependency downloads and full builds belong in
+the earlier `./workshop prepare` step.
 
 ## With a coding agent
 

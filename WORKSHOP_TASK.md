@@ -1,12 +1,11 @@
-# Task 02 — Behavior Tree to FSM Refinement
+# Task 03 — Temporal Trace Conformance
 
-**Timebox: 11 minutes**
+**Timebox: 6 minutes**
 
 ## Goal
 
-Find one behavioral regression introduced by a handwritten FSM rewrite, repair
-the rewrite, and prove that the corrected FSM produces the same observable
-decision as the simplified Behavior Tree for every Boolean observation.
+See why individually valid messages can still form an invalid protocol trace,
+then make Lean certify the exact temporal diagnostic.
 
 ## Start
 
@@ -14,14 +13,24 @@ decision as the simplified Behavior Tree for every Boolean observation.
 ./workshop task start
 ```
 
+The Python monitor is already complete on this checkpoint. Run it once and read
+the first rejected-event diagnostics.
+
 ## Work
 
-1. Read the ordered `MISSION_TREE` in Python. The first matching branch wins.
-2. Implement `counterexample_observation()` so the buggy FSM and BT disagree.
-3. Repair `fsm_decision(...)` without changing the reference tree.
-4. In Lean, complete `corrected_fsm_matches_bt`.
-5. Keep the scope exact: this is a one-decision teaching model, not full
-   BehaviorTree.CPP semantics.
+In Lean, complete only:
+
+```text
+stale_update_diagnostic
+```
+
+The trace is concrete and decidable. Do not expand this into a full VDA 5050
+formalization.
+
+## Claim boundary
+
+This proves one temporal rule in a teaching profile. It is **not** VDA 5050
+certification.
 
 ## Done
 
@@ -29,10 +38,5 @@ decision as the simplified Behavior Tree for every Boolean observation.
 ./workshop task check
 ```
 
-Stop at:
-
-```text
-WORKSHOP_TASK_OK 02-bt-refinement
-```
-
-Then run `./workshop task next`.
+Stop at `WORKSHOP_TASK_OK 03-vda-trace`, then run
+`./workshop task next`.

@@ -49,13 +49,17 @@ doctor() {
   fi
 }
 
+model_for_profile() {
+  case "$1" in
+    tiny) printf '%s' "$TINY_MODEL" ;;
+    standard) printf '%s' "$STANDARD_MODEL" ;;
+    *) fail "unknown local-agent profile '$1'" ;;
+  esac
+}
+
 serve() {
   local profile="${1:-tiny}" model
-  case "$profile" in
-    tiny) model="$TINY_MODEL" ;;
-    standard) model="$STANDARD_MODEL" ;;
-    *) fail "unknown local-agent profile '$profile'" ;;
-  esac
+  model="$(model_for_profile "$profile")"
 
   doctor
   if command -v llama >/dev/null 2>&1; then
@@ -65,10 +69,26 @@ serve() {
   fi
 }
 
+prefetch() {
+  local profile="${1:-tiny}" model
+  model="$(model_for_profile "$profile")"
+  doctor
+  log "Prefetching local model profile '$profile'"
+  if command -v llama >/dev/null 2>&1; then
+    llama cli -hf "$model" -p "Reply only READY" -n 1 >/dev/null
+  elif command -v llama-cli >/dev/null 2>&1; then
+    llama-cli -hf "$model" -p "Reply only READY" -n 1 >/dev/null
+  else
+    fail "llama CLI is unavailable even though a server binary was found"
+  fi
+  log "Local model '$profile' is cached"
+}
+
 case "${1:-profiles}" in
   profiles) profiles ;;
   doctor) doctor ;;
   serve) shift; serve "${1:-tiny}" ;;
+  prefetch) shift; prefetch "${1:-tiny}" ;;
   prompt)
     exec bash "$REPOSITORY_ROOT/scripts/task.sh" prompt
     ;;

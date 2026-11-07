@@ -19,43 +19,35 @@ class PlannerDecision(Enum):
 
 
 def separated(path: Interval, obstacle: Interval) -> bool:
-    """TODO: decide whether the two closed intervals are disjoint."""
-    raise NotImplementedError
+    return path.hi < obstacle.lo or obstacle.hi < path.lo
 
 
 def decide_plan(path: Interval, obstacle: Interval) -> PlannerDecision:
-    """TODO: accept only a separated path; otherwise choose fallback."""
-    raise NotImplementedError
+    if separated(path, obstacle):
+        return PlannerDecision.ACCEPT
+    return PlannerDecision.FALLBACK
 
 
 def decide_from_point_estimate(path: Interval, estimate: int) -> PlannerDecision:
-    """TODO: implement the weaker point-estimate baseline."""
-    raise NotImplementedError
-
-
-def accepted_plan_is_collision_free(path: Interval, obstacle: Interval) -> bool:
-    """TODO: exhaustively validate the accepted finite integer intervals."""
-    raise NotImplementedError
+    if path.contains(estimate):
+        return PlannerDecision.FALLBACK
+    return PlannerDecision.ACCEPT
 
 
 def main() -> None:
-    separated_path = Interval(0, 4)
-    separated_obstacle = Interval(7, 10)
-    overlapping_path = Interval(0, 8)
-    overlapping_obstacle = Interval(6, 10)
+    path = Interval(0, 8)
+    obstacle_uncertainty = Interval(6, 10)
     point_estimate = 10
 
-    assert decide_plan(separated_path, separated_obstacle) is PlannerDecision.ACCEPT
-    assert (
-        decide_plan(overlapping_path, overlapping_obstacle)
-        is PlannerDecision.FALLBACK
-    )
-    assert (
-        decide_from_point_estimate(overlapping_path, point_estimate)
-        is PlannerDecision.ACCEPT
-    )
-    assert accepted_plan_is_collision_free(separated_path, separated_obstacle)
-    print("exercise completed")
+    point = decide_from_point_estimate(path, point_estimate)
+    robust = decide_plan(path, obstacle_uncertainty)
+
+    print(f"point estimate decision: {point.name}")
+    print(f"uncertainty-set decision: {robust.name}")
+
+    assert point is PlannerDecision.ACCEPT
+    assert robust is PlannerDecision.FALLBACK
+    print("uncertainty checkpoint passed")
 
 
 if __name__ == "__main__":

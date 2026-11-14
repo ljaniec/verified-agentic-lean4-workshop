@@ -2,13 +2,13 @@
 
 **Current 18-slide deck · 14 November 2026 · Presented by Mariusz Pawlus**
 
-Use with `workshop-slides.pdf` and `workshop-agenda.pdf`. Print the companion
-`speaker_notes.pdf` on A4, actual size. These notes follow the slide order exactly.
-Slides 1–9 are the introduction. Start the **45-minute practical timer on slide 10**;
-slides 10–11 together are Task 00. Do not add a second setup slot.
+Use with `workshop-slides.pdf`; print `speaker_notes.pdf` on A4 at actual size.
+These notes follow all 18 slides and replace the supplied agenda's timing plan.
 
-**Practical stops:** Task 00 → 4:00 · 01 → 12:00 · 02 → 23:00 · 03 → 29:00 ·
-04 → 35:00 · 05 → 42:00 · wrap-up → 45:00.
+**Delivery flow:** spend about **15 minutes introducing Lean 4** on slides 1–9,
+then work through Tasks 00–05 with the group. Slides 10–11 together are Task 00;
+slides 17–18 close the session. There are **no fixed task timings or deadlines**.
+Adjust the pace to participants' progress and use the recovery options below.
 
 ## Slide 1 — From Hallucination to Proof
 
@@ -63,7 +63,7 @@ the wrong engineering result.”
 
 <!-- pagebreak -->
 
-# Introduction continued — slides 6–10
+# Introduction and task setup — slides 6–10
 
 ## Slide 6 — Running example: lifecycle resources
 
@@ -92,9 +92,9 @@ Lean either accepts that exact proof or returns a diagnostic for repair.
 The model is outside the proof authority. In the repository, agent instructions
 keep the definitions and theorem fixed and prohibit proof bypasses.”
 
-**Clarify:** the slide's `./workshop task check` is the older local route.
-For this browser workshop, use Lean Web's **All Messages**. The current offline
-command is `./workshop browser check`.
+**Clarify:** for this browser workshop, use Lean Web's **All Messages**.
+The offline command is `./workshop browser check`; the slide's
+`./workshop task check` is an alias for that bundle check.
 
 **Transition:** “Before trying it, let us be precise about the limits.”
 
@@ -110,7 +110,8 @@ justifying that the set contains the real obstacle is a separate obligation.”
 
 ## Slide 10 — Workshop setup: use Lean in the browser
 
-**START THE 45-MINUTE PRACTICAL TIMER NOW. Task 00 ends at 4:00.**
+**Begin the tasks after the roughly 15-minute introduction.** Help the group
+open the editor and load Task 00 before demonstrating the checker.
 
 “We are using Lean in the browser so nobody spends workshop time installing a
 toolchain. Open `https://live.lean-lang.org/`, paste the entire self-contained
@@ -129,8 +130,6 @@ The files need only `import Std`; no account, API key, or model setup is needed.
 
 ## Slide 11 — Task 00: the verification gate
 
-**0:00–4:00 overall · maximum explanation: 45 seconds.**
-
 “The model, developer, and local agent are all proposers. None certifies its
 own result. The exact Lean checker is the acceptance boundary.”
 
@@ -139,12 +138,11 @@ side to `n + 1`, observe rejection, and restore it. Point to the candidate arrow
 and the outside feedback arrow. No `sorry`, `admit`, invented assumptions, or
 ‘looks correct’ verdict. The following tasks keep their statements fixed.
 
+**Move on when:** participants have seen both acceptance and rejection.
 **Transition:** “Now we will see why changing one state enum is not enough
-to make a robotics transition safe.” **HARD STOP: move on at 4:00.**
+to make a robotics transition safe.”
 
 ## Slide 12 — Task 01: resource-aware lifecycle invariants
-
-**4:00–12:00 · 60 seconds before work; 45 seconds for the solution.**
 
 “The bug is not that the mode failed to change. The mode changes correctly,
 but the sensor and log handles remain open in an inactive state.”
@@ -165,11 +163,10 @@ cases m <;> cases sensor <;> cases log <;> cases act <;> cases e <;>
 ```
 
 **Transition:** “The next problem is a behavior-changing refactor.”
-**HARD STOP: 12:00, even if some proofs are unfinished.**
+If a proof is unfinished, have the participant save it before opening the next
+starter. Each task is independent.
 
 ## Slide 13 — Task 02: Behavior Tree to FSM refinement
-
-**12:00–23:00 · 75 seconds before work; 60 seconds for the solution.**
 
 “This is a priority regression. The reference checks cancellation before path
 availability; the buggy FSM reverses that order.” Use `cancelRequested = true`,
@@ -185,15 +182,14 @@ cases obs.cancelRequested <;> cases obs.goalReached <;>
 
 Say “three Boolean case splits, then reflexivity”; do not narrate all eight cases.
 **Transition:** “Well-typed decisions can still form an invalid sequence.”
-**HARD STOP: 23:00. This is the easiest place to overrun.**
+If the group needs help, show the three case splits and explain why they cover
+every modeled observation before moving on.
 
 <!-- pagebreak -->
 
 # Demonstrations and repair — slides 14–16
 
 ## Slide 14 — Task 03: beyond schema validation — temporal traces
-
-**23:00–29:00 · maximum explanation: 45 seconds total.**
 
 “A schema validates one message. A temporal monitor validates how messages
 evolve over time. Both update-zero messages are individually well formed,
@@ -205,11 +201,8 @@ show **No messages**. This proves the diagnostic for this concrete trace.
 
 **Boundary:** a teaching profile, not full VDA 5050 certification.
 **Transition:** “Next we move from temporal to geometric uncertainty.”
-**HARD STOP: 29:00.**
 
 ## Slide 15 — Task 04: point estimates versus uncertainty sets
-
-**29:00–35:00 · maximum explanation: 45 seconds total.**
 
 “The point estimate at ten is outside the path, so the weak planner accepts.
 The uncertainty interval overlaps the path between six and eight, so the
@@ -223,11 +216,9 @@ Do not describe this example as a universal planner-safety theorem.
 set. It does not prove that perception actually enclosed the real obstacle.”
 
 **Transition:** “Finally, we will give Lean a bad proposal and repair it using
-the real diagnostic.” **HARD STOP: 35:00.**
+the real diagnostic.”
 
 ## Slide 16 — Task 05: proposal, rejection, and repair
-
-**35:00–42:00 · maximum explanation: 60 seconds total.**
 
 “The first candidate is intentionally wrong. Rejection is the feature we want
 to expose.” Paste the Task 05 starter with `rfl` and read the actual error:
@@ -248,15 +239,13 @@ theorem deactivation_from_active_is_safe :
 unavailable, use this deterministic sequence immediately.
 
 **Transition:** “The value is a fast proposer connected to a verifier that can
-say no.” **HARD STOP: finish by 42:00.**
+say no.”
 
 <!-- pagebreak -->
 
 # Close and recovery — slides 17–18
 
 ## Slide 17 — What the workshop establishes — and what it does not
-
-**42:00–45:00 · maximum: three minutes including the close.**
 
 “We verified explicit properties of explicit models. Lean gives a strong answer
 to: does this theorem follow from these definitions and assumptions? Engineers
@@ -276,12 +265,12 @@ the wrong engineering result.”
 
 “Thank you. We can take questions after the practical sequence.”
 Point to `machinekind.ai/links/` if participants want the community links.
-**HARD STOP: 45:00. Do not introduce another topic.**
 
-## Emergency cut list
+## Adjusting the pace
 
-If two minutes behind, stop explaining implementation details. Show the result,
-state its boundary, and move to the next task. Cut in this order:
+Follow the group's progress rather than fixed task deadlines. If less time
+remains than expected, show the checked result, state its boundary, and move
+to the next task. Simplify in this order:
 
 1. Do not explain the internals of `rcases`, `cases`, `simp`, `rfl`, or `decide`.
 2. Show Tasks 03 and 04 as presenter demonstrations.
@@ -302,7 +291,7 @@ The checker result, not the identity of the proposer, is the point.
 
 ## Last check before speaking
 
-- Open the current slides, agenda, and the published browser task guide.
+- Open the current slides, these notes, and the published browser task guide.
 - Use the repaired QR on slide 10 and the outside feedback arrow on slide 11.
 - Keep Lean Web's All Messages panel open and wait for checking to finish.
-- Keep the timer visible; start it on slide 10 and stop at 45:00.
+- Allow about 15 minutes for the Lean introduction, then guide the tasks at the group's pace without fixed task timings.

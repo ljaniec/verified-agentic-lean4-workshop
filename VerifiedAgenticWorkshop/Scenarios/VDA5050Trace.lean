@@ -1,5 +1,7 @@
 import Mathlib
 
+deriving instance DecidableEq for Except
+
 namespace VerifiedAgenticWorkshop.Scenarios.VDA5050Trace
 
 /-!

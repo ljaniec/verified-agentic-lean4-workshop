@@ -10,8 +10,14 @@ structure Interval where
 def Contains (interval : Interval) (point : Int) : Prop :=
   interval.lo ≤ point ∧ point ≤ interval.hi
 
+instance (interval : Interval) (point : Int) : Decidable (Contains interval point) :=
+  inferInstanceAs (Decidable (interval.lo ≤ point ∧ point ≤ interval.hi))
+
 def Separated (path obstacle : Interval) : Prop :=
   path.hi < obstacle.lo ∨ obstacle.hi < path.lo
+
+instance (path obstacle : Interval) : Decidable (Separated path obstacle) :=
+  inferInstanceAs (Decidable (path.hi < obstacle.lo ∨ obstacle.hi < path.lo))
 
 inductive PlannerDecision where
   | accept

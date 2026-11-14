@@ -131,8 +131,7 @@ accepts. The uncertainty interval `[6, 10]` overlaps the path, so the set-aware
 planner falls back. Prove both decisions together. Hint: try `decide`.
 
 This task checks that concrete example. A separate argument must justify that
-the real obstacle lies in the supplied uncertainty interval. The extended
-curriculum contains a separate universal accepted-plan theorem.
+the real obstacle lies in the supplied uncertainty interval. The task itself proves only the displayed concrete decisions.
 
 <details>
 <summary>Scheduled walkthrough / show the checkpoint</summary>

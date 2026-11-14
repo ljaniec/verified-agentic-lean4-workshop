@@ -1,102 +1,34 @@
-# Troubleshooting
+# Troubleshooting the current workshop
 
-## Browser workshop
+## The starter reports an error
 
-Use the [browser task guide](../course/browser/README.md). Paste the entire
-self-contained file, replacing the previous task. Tasks 01–04 intentionally
-start with an unsolved goal; Task 05 intentionally rejects `rfl`. Read All
-Messages and wait for checking to finish. Never replace an error with a proof
-bypass. If the browser service is unavailable, use the prepared
-[local fallback](offline-mode.md).
+Tasks 01–04 intentionally contain `skip` and report an unsolved goal. Task 05
+intentionally rejects `rfl`. Replace only the final proof, then wait for checking
+to finish and read All Messages. Do not use a proof bypass to hide an error.
 
-`./workshop task status` on `main` reports that it is not a checkpoint branch.
-That is expected: the browser route uses `./workshop browser check`; the
-optional local branch course starts with `./workshop task begin`.
+## Missing definitions or duplicate declarations
 
-The remaining sections concern the optional full local project.
+Use the Raw view of the complete `.lean` file. Replace the previous editor
+contents; do not paste only the last theorem or append tasks together.
 
-For exercise-specific failures, also see
-[`participant-debugging.md`](participant-debugging.md).
+## No goals at the cursor, but the file still has errors
 
-## `git-lfs` is missing
+Inspect All Messages, which covers the entire file. Acceptance requires no errors
+or warnings after the checker finishes; the cursor's goal state alone is not enough.
 
-Install Git LFS, rerun `git lfs install`, then rerun `./workshop setup`.
+## The browser or network is unavailable
 
-## Mathlib starts compiling from source
+Use the presenter's prepared [offline fallback](offline-mode.md). Do not start
+installing packages during the event. A live AI model is optional.
 
-Run `lake exe cache get`. If the cache is inconsistent, remove `.lake` and rerun
-setup. This may redownload dependencies, so do not do it during the live session
-unless the facilitator asks you to.
+## An older command or course link does not work
 
-## Lean Copilot cannot find its models
+The current entry point is `./workshop browser`. Earlier branch courses and
+model integrations were removed from `main`; their files remain in Git history.
+`./workshop task check` remains an alias for the slide's local verification gate.
 
-Run:
+## Optional full local build needs dependencies
 
-```bash
-lake exe LeanCopilot/download
-```
-
-Verify that the user cache directory is writable. During the event, prefer a
-prepared local cache rather than depending on a large live download.
-
-## `-lctranslate2` cannot be linked
-
-Ensure setup completed for Lean Copilot. On native Windows, use the
-platform-specific Lean Copilot linker guidance; WSL 2 is the preferred workshop
-fallback for a mixed environment.
-
-## `./workshop scenario check` fails while I am only halfway through a task
-
-The full scenario checker validates the entire active Lean/Python pair. During
-an intermediate Lean checkpoint, a later required TODO may still be unfinished.
-Use the Lean editor goal/error state for the theorem you are currently solving
-and run the full scenario check after the required baseline tasks are complete.
-
-The optional finite-trace stretch theorems are not predeclared in the baseline
-starter, so skipping them does not block the required check.
-
-## ADK cannot find the agent
-
-Run from the repository root:
-
-```bash
-./workshop agent-web
-```
-
-or, when debugging the ADK command directly:
-
-```bash
-uv run adk web agents
-```
-
-The `agents/verified_lean_tutor/` directory must contain `__init__.py` and
-`agent.py`, and `agent.py` must export `root_agent`.
-
-## The Gemini agent stops with `GOOGLE_MODEL is not configured`
-
-This is intentional. The repository does not silently select a possibly stale
-model for the live event. Copy `.env.example` to `.env` and set both:
-
-```text
-GOOGLE_API_KEY=...
-GOOGLE_MODEL=<tested-event-model>
-```
-
-only after the facilitator has selected and rehearsed the exact event
-configuration.
-
-## A model says the proof is complete, but Lean fails
-
-The candidate is not verified. Read the exact Lean diagnostic, repair the
-source, and run the checker again. Never weaken the gate by inserting a proof
-hole or unchecked assumption.
-
-## I started the next scenario and lost my previous files
-
-The scenario loader backs up the active pair before replacing it. Look under:
-
-```text
-playground/backups/
-```
-
-and follow [`../curriculum/CATCH_UP.md`](../curriculum/CATCH_UP.md).
+The browser bundle requires only the pinned Lean toolchain and Python. To build
+the separate shared Mathlib library before the event, use `lake exe cache get`
+and `lake build`. Do not attempt those downloads during the practical segment.

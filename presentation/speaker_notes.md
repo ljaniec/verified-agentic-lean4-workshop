@@ -1,230 +1,308 @@
-# Speaker Script — Lean 4 and Software Verification
+# From Hallucination to Proof — Speaker Notes
 
-> Earlier introduction draft. The current event uses the
-> [supplied presentation](workshop-slides.pdf) and
-> [agenda / task talk hints](workshop-agenda.pdf). This script does not follow
-> the supplied 18-slide deck; retain it only as optional background.
+**Current 18-slide deck · 14 November 2026 · Presented by Mariusz Pawlus**
 
-This script follows the ten slides in `lean4_software_verification_15min.tex`.
-It is written to be spoken almost verbatim. Keep the examples at the level given
-here; the hands-on workshop will provide the details.
+Use with `workshop-slides.pdf` and `workshop-agenda.pdf`. Print the companion
+`speaker_notes.pdf` on A4, actual size. These notes follow the slide order exactly.
+Slides 1–9 are the introduction. Start the **45-minute practical timer on slide 10**;
+slides 10–11 together are Task 00. Do not add a second setup slot.
 
-## Delivery rule
-
-- Read the main paragraph for each slide.
-- Use the final **transition sentence** to advance immediately.
-- Do not explain unrelated Lean syntax, theorem-prover history, type theory,
-  ROS 2 internals, BehaviorTree.CPP internals, or the broader research program
-  unless someone asks after the workshop.
-- If you are running late, omit the paragraph marked **Optional**.
-
----
+**Practical stops:** Task 00 → 4:00 · 01 → 12:00 · 02 → 23:00 · 03 → 29:00 ·
+04 → 35:00 · 05 → 42:00 · wrap-up → 45:00.
 
 ## Slide 1 — From Hallucination to Proof
 
-Good morning. I want to start with one practical question: if an AI agent writes
-or modifies robotics software, what would make us accept the result as correct?
-A confident explanation is not enough, and a plausible-looking piece of code is
-not enough. In this workshop we will use Lean 4 as an independent verification
-boundary. AI systems may propose implementations, invariants, and proofs, but
-they do not certify their own output. The principle for the whole session is:
-**AI can propose; the verifier decides what is accepted.**
+“Today we will connect a fast, fallible proposer to an independent checker.
+An AI assistant can suggest code, requirements, and proofs. Our question is:
+what evidence lets us accept the result? We will use small robotics examples
+and Lean 4 to make that acceptance boundary visible.”
 
-**Transition:** First, let us clarify why this distinction matters particularly
-now.
+**Transition:** “Why does this matter when AI changes software?”
 
----
+## Slide 2 — Why this matters now
 
-## Slide 2 — Why verification matters now
+“Agents can already generate and refactor substantial software. In robotics,
+software decisions can become physical actions. Plausible code and passing
+examples are useful, but they do not establish that a property holds in every
+modeled execution. The agent is allowed to be wrong; the verification boundary
+must not pretend that it succeeded.”
 
-AI coding agents can already generate, refactor, and explain fairly complex
-software. That is useful, but robotics is a difficult environment for plausible
-code. A robotic system combines state machines, asynchronous callbacks,
-sensors, logs, shared resources, communication protocols, and physical actions.
-A subtle state-management error may not merely produce a bad web page; it may
-change what a machine does in the world. We therefore need a clean separation
-between producing a candidate and accepting that candidate. The language model
-may be powerful and still be wrong. The checker should remain independent of
-it.
+**Point to:** proposer → software → physical system. **Transition:** “Testing
+and proving give us different kinds of evidence.”
 
-**Scope guard:** Do not turn this into a general discussion of AI safety or all
-possible robotics failures.
+## Slide 3 — Testing and verification answer different questions
 
-**Transition:** The first distinction we need is between testing and proving.
+“A test checks executions we choose to run. It is excellent for finding a
+counterexample. A theorem covers every value admitted by its formal model,
+under stated assumptions. Here the assumption says the starting state is safe;
+the conclusion says the next state is safe. We need both concrete executions
+and explicit contracts.”
 
----
+**Avoid:** claiming that every execution of the real robot has been covered.
+**Transition:** “What makes Lean a checker of that contract?”
 
-## Slide 3 — Testing and proving answer different questions
+## Slide 4 — Lean 4 in one slide
 
-Testing and formal verification are complementary. A test executes selected
-examples. It is excellent for finding concrete failures and for checking a real
-implementation under realistic conditions. But a test normally samples only a
-small part of the possible state space. A formal proof starts from a precise
-mathematical claim and asks whether that claim holds for every case represented
-by the model. This gives broader coverage, but only inside the model and under
-its assumptions. My shorthand for the workshop is: **Python shows what happens
-for concrete executions; Lean checks what must always happen in the formal
-model.** We want both, not one instead of the other.
+“A theorem is a proposition represented as a type. A proof is a term of that
+type. Tactics help construct the term; the kernel checks it. Mathlib supplies
+reusable mathematics, though today's paste-ready tasks need only Lean's standard
+library. An accepted proof establishes the exact statement, not an AI's explanation.”
 
-**Transition:** So what exactly does Lean check?
+**Avoid:** a tactic catalog or type-theory detour. **Transition:** “There are
+still engineering decisions outside the proof.”
 
----
+## Slide 5 — The three layers of correctness
 
-## Slide 4 — What Lean 4 checks
+“Separate the real system, the model we chose, and the requirement we expressed
+as a formal claim. Lean checks whether the proof establishes that claim from
+those definitions and assumptions. Engineers still have to justify that the
+model and requirement are right. A correct proof of the wrong theorem is still
+the wrong engineering result.”
 
-Lean represents a proposition as a type and a proof as a term of that type. You
-do not need to understand the full type-theoretic foundation today. The
-practical point is simpler. We define a state, a transition function, and a
-property such as `Safe`. Then we state a theorem saying that if the current
-state is safe, the next state is also safe. Tactics help us construct the proof,
-but the final proof term is checked against the theorem statement. If the proof
-does not establish exactly that statement, Lean rejects it. The theorem is not
-accepted because the tactic looked intelligent or because an AI model sounded
-confident.
+**Transition:** “The lifecycle example makes this concrete.”
 
-**Scope guard:** Do not explain dependent type theory, Curry–Howard history, or
-the Lean elaborator here.
+<!-- pagebreak -->
 
-**Transition:** This is where the small trusted kernel becomes important.
+# Introduction continued — slides 6–10
 
----
+## Slide 6 — Running example: lifecycle resources
 
-## Slide 5 — Why the kernel matters
+“Changing the lifecycle enum is not enough. The application also owns sensor,
+log, and actuator resources. Open resources require active mode, and active mode
+requires the sensor and log. A faulty deactivation can change the mode while
+retaining resources. A test that checks only the mode misses the broken invariant.”
 
-A proof candidate can come from a human, Gemini, Codex, Claude, Lean Copilot, or
-a small local model. All of these generators can make mistakes. They may use a
-nonexistent lemma, produce invalid syntax, misunderstand the assumptions, or
-simply prove something different from the requested claim. Lean's kernel is the
-final checker of the resulting proof term. This gives us a useful architecture:
-a strong but fallible generator remains outside a much smaller and stricter
-verification boundary. We do not need the generator to be infallible. We need
-its output to pass an independent check.
+**Point to:** the inactive state with retained handles. **Transition:** “A
+refactor can introduce a different kind of bug: a changed priority.”
 
-**Optional:** This is also why switching models does not change the trust model.
-Different models can propose different candidates, while Lean applies the same
-acceptance criterion to all of them.
+## Slide 7 — Refactoring behavior, not syntax
 
-**Transition:** However, a checked proof is not automatically a proof about the
-entire physical robot.
+“The reference Behavior Tree checks cancellation before success or an available
+path. A handwritten FSM checks path availability too early. When cancellation
+and a path are both present, the BT stops but the buggy FSM drives. Our contract
+will be equality of the observable decision for every modeled observation.”
 
----
+**Avoid:** full asynchronous Behavior Tree semantics. **Transition:** “Every
+proposer will face the same acceptance gate.”
 
-## Slide 6 — What have we actually verified?
+## Slide 8 — AI-assisted verification: one gate for every proposer
 
-There are several layers between a physical system and a verified theorem. We
-start with the real robot and its environment. We choose modelling assumptions
-and build a formal state and transition model. We then decide what property to
-state: an invariant, a refinement relation, or another contract. Finally, Lean
-checks the proof of that property. These layers produce three separate
-questions. First: is the theorem true of the model? Lean answers this very well.
-Second: does the model represent the relevant part of the real system? Third:
-did we formalize the requirement we actually care about? Those last two are
-engineering and specification problems. Lean makes them more visible, but it
-does not solve them automatically.
+“A human, Gemini, Codex, Claude, or a local model may propose a candidate.
+Lean either accepts that exact proof or returns a diagnostic for repair.
+The model is outside the proof authority. In the repository, agent instructions
+keep the definitions and theorem fixed and prohibit proof bypasses.”
 
-**Key sentence:** A formally verified answer to the wrong question is still the
-wrong engineering result.
+**Clarify:** the slide's `./workshop task check` is the older local route.
+For this browser workshop, use Lean Web's **All Messages**. The current offline
+command is `./workshop browser check`.
 
-**Transition:** The lifecycle example shows this distinction with a very small
-model.
+**Transition:** “Before trying it, let us be precise about the limits.”
 
----
+## Slide 9 — What we are not claiming
 
-## Slide 7 — Lifecycle state is not the whole state
+“Lifecycle preservation is about our resource model, not the whole ROS 2 runtime
+or physical shutdown. BT refinement is about simplified decisions, not arbitrary
+concurrent trees. The trace monitor is a teaching profile, not VDA 5050
+certification. The uncertainty contract is relative to the supplied set;
+justifying that the set contains the real obstacle is a separate obligation.”
 
-Imagine a ROS 2-style managed component. Its lifecycle mode may be
-`Unconfigured`, `Inactive`, or `Active`, but the application state contains more
-than that enum. It may own a sensor handle, an open log, and the authority to
-command an actuator. We can state an invariant: an active node must have the
-required resources, and any retained runtime resource implies that the node is
-active. Now consider a faulty deactivation that changes only the mode from
-`Active` to `Inactive` but leaves the sensor, log, or actuator enabled. A unit
-test checking only the enum can pass. The application invariant fails. In the
-workshop we will repair the transition and prove that every modeled transition
-preserves the invariant.
+**Transition:** “Now we will check the actual examples.”
 
-**Scope guard:** Do not explain the complete ROS 2 lifecycle standard or real
-resource-acquisition APIs.
+## Slide 10 — Workshop setup: use Lean in the browser
 
-**Transition:** The next example concerns a refactor rather than one state
-transition.
+**START THE 45-MINUTE PRACTICAL TIMER NOW. Task 00 ends at 4:00.**
 
----
+“We are using Lean in the browser so nobody spends workshop time installing a
+toolchain. Open `https://live.lean-lang.org/`, paste the entire self-contained
+task, and edit only the final proof after `:= by`. Read the exact diagnostic.
+Accept the candidate only after checking has finished with no errors or warnings.”
 
-## Slide 8 — Did the refactor preserve behavior?
+**Show:** the QR, the published README, Task 00's **Raw** file, and the editor.
+Replace the previous editor contents each time. Keep **All Messages** expanded.
+The files need only `import Std`; no account, API key, or model setup is needed.
 
-The reference policy is a simplified Behavior Tree. It checks cancellation
-first, then success, then whether a path is available, and finally requests a
-plan. A handwritten FSM rewrite accidentally checks path availability before
-cancellation. Most ordinary examples still look correct. But when a cancellation
-request and an available path occur together, the reference policy stops while
-the rewrite drives. That one counterexample exposes an implicit priority rule.
-We then repair the FSM and state a universal refinement theorem: for every
-modeled observation, the corrected FSM returns the same observable decision as
-the reference policy. This is a precise meaning of “the refactor preserves
-behavior” for this small model.
+**Transition:** “The proposer offers a candidate. The checker decides.”
 
-**Scope guard:** Do not claim full equivalence with arbitrary asynchronous
-Behavior Trees, blackboards, or `RUNNING` semantics.
+<!-- pagebreak -->
 
-**Transition:** AI assistance becomes useful when it operates inside this
-verification loop.
+# Hands-on work — slides 11–13
 
----
+## Slide 11 — Task 00: the verification gate
 
-## Slide 9 — AI-assisted verification loop
+**0:00–4:00 overall · maximum explanation: 45 seconds.**
 
-The workflow is intentionally simple. The agent reads the goal and proposes a
-candidate. The repository runs the exact local checker. If Lean rejects the
-candidate, we keep the real diagnostic and return it to the agent. The agent
-then proposes a smaller repair, and the same checker runs again. During the
-final task we will deliberately start with a wrong proof candidate, so the
-rejection is guaranteed rather than staged. This demonstrates the distinction
-between generation and verification. A bad proof of a good theorem can be
-caught by Lean. But there is another failure mode: a good proof of a weak or
-incorrect theorem may compile perfectly.
+“The model, developer, and local agent are all proposers. None certifies its
+own result. The exact Lean checker is the acceptance boundary.”
 
-**Key sentence:** The agent is allowed to be wrong. The verification boundary
-is not allowed to pretend that it succeeded.
+**Show:** Task 00 accepts `n + 0 = n` with `rfl`. Temporarily change the right
+side to `n + 1`, observe rejection, and restore it. Point to the candidate arrow
+and the outside feedback arrow. No `sorry`, `admit`, invented assumptions, or
+‘looks correct’ verdict. The following tasks keep their statements fixed.
 
-**Transition:** That leads to the limitations we should state explicitly.
+**Transition:** “Now we will see why changing one state enum is not enough
+to make a robotics transition safe.” **HARD STOP: move on at 4:00.**
 
----
+## Slide 12 — Task 01: resource-aware lifecycle invariants
 
-## Slide 10 — What formal verification gives us
+**4:00–12:00 · 60 seconds before work; 45 seconds for the solution.**
 
-Formal verification gives strong guarantees for explicit claims under explicit
-definitions and assumptions. It can expose regressions, missing cases,
-inconsistent state, and false universal claims. It does not automatically prove
-that our sensor model is accurate, that timing assumptions hold, that every
-physical effect is represented, or that our natural-language requirement was
-translated correctly. The practical goal is therefore not to claim that the
-whole robot is “formally verified.” It is to build small, explicit,
-independently checked contracts at important software boundaries. AI can help
-us formulate, implement, and repair those contracts, but it should not certify
-itself.
+“The bug is not that the mode failed to change. The mode changes correctly,
+but the sensor and log handles remain open in an inactive state.”
 
-We will now apply this pattern directly. The repository will give us a concrete
-execution, a formal claim, an agent proposal, and a local verification result.
+**Show:** the buggy Python line, then the repaired line that sets all resource
+flags to `False`. In the Lean snippet, the repaired `step` is already supplied.
+Participants prove that it preserves `Safe`, assuming the starting state is safe.
+Four modes, eight Boolean flag combinations, and six events give **192 modeled
+state/event combinations**; the safety assumption rules out unsafe inputs.
 
-**Final transition:** Let us start with the lifecycle resource invariant.
+**When showing the solution, say one sentence:** “The case splits enumerate
+the finite model; simplification closes the resulting goals.”
 
----
+```lean
+rcases s with ⟨m, sensor, log, act⟩
+cases m <;> cases sensor <;> cases log <;> cases act <;> cases e <;>
+  simp [Safe, step, initial, activeState] at h ⊢
+```
 
-# One-page presenter guardrail
+**Transition:** “The next problem is a behavior-changing refactor.”
+**HARD STOP: 12:00, even if some proofs are unfinished.**
 
-Use these sentences if you feel yourself drifting:
+## Slide 13 — Task 02: Behavior Tree to FSM refinement
 
-1. **AI motivation:** “The issue is not whether the model is useful; it is who
-   decides that its output is correct.”
-2. **Testing:** “Tests cover executions we run; a proof covers the cases in the
-   formal model.”
-3. **Lean:** “Tactics and LLMs construct candidates; the kernel checks them.”
-4. **Limitations:** “Proof correctness and model adequacy are different
-   questions.”
-5. **Lifecycle:** “The enum changed, but the resources did not.”
-6. **BT refinement:** “The counterexample exposes a priority regression.”
-7. **Agent loop:** “Use the diagnostic, repair the candidate, run the same
-   checker again.”
-8. **Conclusion:** “Small verified contracts, not universal claims about the
-   whole physical system.”
+**12:00–23:00 · 75 seconds before work; 60 seconds for the solution.**
+
+“This is a priority regression. The reference checks cancellation before path
+availability; the buggy FSM reverses that order.” Use `cancelRequested = true`,
+`goalReached = false`, `pathAvailable = true`: the BT stops; the buggy FSM drives.
+
+**Claim:** the supplied corrected FSM and reference BT return the same observable
+decision for all **eight** Boolean observations. Participants prove this equality.
+
+```lean
+cases obs.cancelRequested <;> cases obs.goalReached <;>
+  cases obs.pathAvailable <;> rfl
+```
+
+Say “three Boolean case splits, then reflexivity”; do not narrate all eight cases.
+**Transition:** “Well-typed decisions can still form an invalid sequence.”
+**HARD STOP: 23:00. This is the easiest place to overrun.**
+
+<!-- pagebreak -->
+
+# Demonstrations and repair — slides 14–16
+
+## Slide 14 — Task 03: beyond schema validation — temporal traces
+
+**23:00–29:00 · maximum explanation: 45 seconds total.**
+
+“A schema validates one message. A temporal monitor validates how messages
+evolve over time. Both update-zero messages are individually well formed,
+but the second one is stale.”
+
+**Show:** `Order(7,0)` followed by `Order(7,0)`. The exact result is
+`.error .orderUpdateNotIncreasing`. Replace the final `skip` with `decide` and
+show **No messages**. This proves the diagnostic for this concrete trace.
+
+**Boundary:** a teaching profile, not full VDA 5050 certification.
+**Transition:** “Next we move from temporal to geometric uncertainty.”
+**HARD STOP: 29:00.**
+
+## Slide 15 — Task 04: point estimates versus uncertainty sets
+
+**29:00–35:00 · maximum explanation: 45 seconds total.**
+
+“The point estimate at ten is outside the path, so the weak planner accepts.
+The uncertainty interval overlaps the path between six and eight, so the
+set-aware planner falls back.”
+
+**Show the picture first:** path `[0,8]`; point estimate `10`; obstacle interval
+`[6,10]`. Then show the theorem and use `decide` to check both concrete decisions.
+Do not describe this example as a universal planner-safety theorem.
+
+**Critical limit:** “Lean proves the decision relative to the supplied uncertainty
+set. It does not prove that perception actually enclosed the real obstacle.”
+
+**Transition:** “Finally, we will give Lean a bad proposal and repair it using
+the real diagnostic.” **HARD STOP: 35:00.**
+
+## Slide 16 — Task 05: proposal, rejection, and repair
+
+**35:00–42:00 · maximum explanation: 60 seconds total.**
+
+“The first candidate is intentionally wrong. Rejection is the feature we want
+to expose.” Paste the Task 05 starter with `rfl` and read the actual error:
+**Expected the goal to be a binary relation.** The goal is `Safe (...)`,
+so reflexivity does not prove it.
+
+Give the diagnostic to an assistant, or propose the repair yourself. Keep the
+statement and definitions fixed; replace only the final proof with `decide`.
+Wait for **No goals** and **No messages** before calling the file accepted.
+
+```lean
+theorem deactivation_from_active_is_safe :
+    Safe (step activeState .deactivate) := by
+  decide
+```
+
+**Emphasize:** any human or model uses the same gate. If the model is slow or
+unavailable, use this deterministic sequence immediately.
+
+**Transition:** “The value is a fast proposer connected to a verifier that can
+say no.” **HARD STOP: finish by 42:00.**
+
+<!-- pagebreak -->
+
+# Close and recovery — slides 17–18
+
+## Slide 17 — What the workshop establishes — and what it does not
+
+**42:00–45:00 · maximum: three minutes including the close.**
+
+“We verified explicit properties of explicit models. Lean gives a strong answer
+to: does this theorem follow from these definitions and assumptions? Engineers
+still have to justify that the model matches the system and that the theorem
+expresses the right requirement. AI is the high-velocity proposer; Lean is the
+strict verifier.”
+
+Lifecycle and BT tasks prove universal claims inside their finite models.
+The trace and uncertainty tasks prove the concrete examples displayed.
+Sensor coverage, scheduling, networking, and physical-system fidelity remain
+engineering obligations. Do not expand the demonstrated claims during wrap-up.
+
+**Final sentence:** “A formally checked answer to the wrong question is still
+the wrong engineering result.”
+
+## Slide 18 — Thank you
+
+“Thank you. We can take questions after the practical sequence.”
+Point to `machinekind.ai/links/` if participants want the community links.
+**HARD STOP: 45:00. Do not introduce another topic.**
+
+## Emergency cut list
+
+If two minutes behind, stop explaining implementation details. Show the result,
+state its boundary, and move to the next task. Cut in this order:
+
+1. Do not explain the internals of `rcases`, `cases`, `simp`, `rfl`, or `decide`.
+2. Show Tasks 03 and 04 as presenter demonstrations.
+3. State Task 02's eight-case result instead of waiting for everyone.
+
+## Presenter fallback
+
+**Browser unavailable:** project the local files and run `./workshop browser check`.
+The pinned Lean toolchain must already be installed; no project packages or
+credentials are needed for the browser bundle. For a copied edited file, run
+`./workshop browser check playground/current/Current.lean`.
+
+**Participant falls behind:** save their text and paste the next complete starter.
+The tasks are independent. Do not wait for a stretch proof or download models.
+
+**Model unavailable:** show Task 05's known `rfl` rejection and `decide` repair.
+The checker result, not the identity of the proposer, is the point.
+
+## Last check before speaking
+
+- Open the current slides, agenda, and the published browser task guide.
+- Use the repaired QR on slide 10 and the outside feedback arrow on slide 11.
+- Keep Lean Web's All Messages panel open and wait for checking to finish.
+- Keep the timer visible; start it on slide 10 and stop at 45:00.

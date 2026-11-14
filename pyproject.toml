@@ -1,35 +1,18 @@
-[build-system]
-requires = ["hatchling>=1.27,<2"]
-build-backend = "hatchling.build"
-
 [project]
 name = "verified-agentic-lean4-workshop"
-version = "0.1.0"
-description = "Local-first workshop tooling for verified AI-agent workflows with Lean 4."
+version = "0.2.0"
+description = "Checked browser workshop on trustworthy AI agents and Lean 4."
 readme = "README.md"
 requires-python = ">=3.11,<3.14"
 dependencies = []
 
-[project.optional-dependencies]
-agent = [
-  "google-adk==2.5.0",
-  "python-dotenv>=1.1,<2",
-]
-
 [dependency-groups]
-dev = [
-  "mypy>=1.16,<2",
-  "pytest>=8.4,<9",
-  "ruff>=0.12,<1",
-]
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/verified_agentic_workshop"]
+dev = ["mypy>=1.16,<2", "pytest>=8.4,<9", "ruff>=0.12,<1"]
 
 [tool.pytest.ini_options]
 addopts = "-q"
 testpaths = ["tests"]
-pythonpath = [".", "src"]
+pythonpath = ["."]
 
 [tool.ruff]
 target-version = "py311"
@@ -41,4 +24,3 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 [tool.mypy]
 python_version = "3.11"
 strict = true
-packages = ["verified_agentic_workshop"]

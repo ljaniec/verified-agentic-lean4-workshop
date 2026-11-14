@@ -1,8 +1,0 @@
-"""The final agent-repair task is Lean-focused."""
-
-def main() -> None:
-    print("agent_repair: Python side ready")
-
-
-if __name__ == "__main__":
-    main()

@@ -1,39 +1,21 @@
-# Presentation and agenda
+# Current presentation and print pack
 
-Open these for the live event:
+Use only these current event files:
 
-- [Presentation — From Hallucination to Proof](workshop-slides.pdf), 18 slides.
-- [Agenda — Workshop Task Talk Hints](workshop-agenda.pdf), 3 pages.
+- [Workshop slides](workshop-slides.pdf) — 18 slides; repaired setup QR and
+  Task 00 feedback arrow routed outside the diagram.
+- [Agenda and task talk hints](workshop-agenda.pdf) — the supplied timing authority.
+- **[Print speaker notes](speaker_notes.pdf)** — five A4 pages, matching all
+  18 slides and the agenda's hard stops.
+- [Editable speaker notes](speaker_notes.md).
 
-Materials by Łukasz Janiec; presented by Mariusz Pawlus. The practical segment
-lasts 45 minutes after the Lean introduction. Participants use the
-[browser task guide](../course/browser/README.md). The supplied PDFs define the
-content and timing; repository tasks follow them.
+Materials by Łukasz Janiec; presented by Mariusz Pawlus. Start the 45-minute
+practical timer on slide 10; slides 10–11 together are Task 00.
 
-## Original documents and the QR repair
+The latest slides preserve all supplied teaching text. The original QR
+placeholder was visually replaced on slide 10. On slide 11, only the feedback
+arrow geometry and label position changed. The earlier original PDF and
+unrelated ten-slide LaTeX draft were removed from `main`; Git history retains them.
 
-The [supplied original presentation](workshop-slides-original.pdf) and agenda
-were copied byte for byte on 2026-11-14. Their SHA-256 values are:
-
-```text
-95a120446686f176b0bed340f55d87a1cdc2c5538160b89a0017b1215f7e3ed4  workshop-slides-original.pdf
-3f376c43a6be82ec0cfa19f9476d788a13203d0d7dbf5678c150eed9284a7bdf  workshop-agenda.pdf
-```
-
-Slide 10 of the original displays `lean_web_qr.png` as a placeholder rather
-than an image. The event copy, `workshop-slides.pdf`, covers that placeholder
-with a QR code encoding `https://live.lean-lang.org/`. No teaching content,
-timing, other slides, or original source files were changed. The event copy
-retains all 18 pages and original text; the placeholder remains beneath the
-visual overlay in text extraction.
-
-A [standalone QR](assets/lean-web-qr.svg) is also available for handouts:
-
-![Open Lean Web](assets/lean-web-qr.svg)
-
-## Older source material
-
-`lean4_software_verification_15min.tex`, `build.sh`, and `speaker_notes.md` are
-an earlier introduction draft. They do **not** reproduce the supplied 18-slide
-PDF. Running `build.sh` produces a separately named draft PDF and does not
-replace the event slides. Use the supplied agenda for current talk cues.
+The [standalone QR](assets/lean-web-qr.svg) opens `https://live.lean-lang.org/`.
+The [browser task guide](../course/browser/README.md) is the participant handout.

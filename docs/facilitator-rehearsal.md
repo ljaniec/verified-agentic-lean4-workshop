@@ -46,14 +46,14 @@ For maintainers with the full local project prepared:
 
 ```bash
 ./workshop check --lean-only
-uv sync --extra agent --group dev --locked
+uv sync --group dev --locked
 ./workshop check
 ```
 
-The ADK import test uses a dummy model name and makes no API call. No credentials
-are required. Live cloud/model integration is optional and must be separately
-rehearsed before use. Local checks replace GitHub Actions for this repository.
+The acceptance checks need no cloud credentials. The six browser tasks were also
+walked through in Lean Web on 2026-11-14 using its default Lean 4.36.0-rc2:
+all completed proofs passed, and the intended starter rejections were observed.
 
-The older branch-based and 90-minute courses are optional paths, not release
-prerequisites for browser participation. Do not mix their larger proof TODOs
-with the shorter slide tasks during the event.
+Print [speaker_notes.pdf](../presentation/speaker_notes.pdf). Its five A4 pages
+follow all 18 current slides. Older courses and model demos have been removed
+from `main` so they cannot distract participants from the checked event path.

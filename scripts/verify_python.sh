@@ -4,8 +4,8 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/common.sh"
 require_command uv
 cd "$REPOSITORY_ROOT"
 
-uv run ruff check .
-uv run mypy src
-uv run pytest
+uv run --locked --extra agent ruff check .
+uv run --locked --extra agent mypy src
+uv run --locked --extra agent pytest
 
 log "Python verification passed"

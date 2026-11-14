@@ -21,6 +21,7 @@ Scenario names:
   bt                       Behavior Tree to handwritten FSM refinement
   vda                      VDA 5050-inspired semantic trace monitor
   uncertainty              Perception-planner uncertainty contract
+  agent                    Deliberately rejected proof, followed by repair
 
 Reference solutions are intentionally absent from the participant branch.
 USAGE

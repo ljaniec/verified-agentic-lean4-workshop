@@ -1,7 +1,10 @@
-# 45-Minute Self-Running Course
+# Optional Local Checkpoint Course
 
-This is the event path. It is deliberately shorter than the extended
-`curriculum/` material.
+The live event follows the [browser route](../browser/README.md), the supplied
+[presentation](../../presentation/workshop-slides.pdf), and
+[agenda](../../presentation/workshop-agenda.pdf). No branch switch or local
+installation is needed for that route. This directory describes the optional
+prepared local course with Python exercises and project dependencies.
 
 The course uses Git branches as verified checkpoints. Every task branch has a
 matching solution branch, and every next task starts from the previous solution.
@@ -43,8 +46,7 @@ This is when dependency and model downloads should happen.
 Start:
 
 ```bash
-git switch workshop/00-build
-./workshop task start
+./workshop task begin
 ```
 
 Then use only:

@@ -1,5 +1,9 @@
 # Setup Design
 
+> Optional local/extended material. For the current 45-minute event, follow
+> the [browser task guide](../course/browser/README.md) and
+> [supplied agenda](../presentation/workshop-agenda.pdf).
+
 The repository deliberately follows the conventional shape of a small Lake
 project rather than introducing a workshop-specific build system:
 

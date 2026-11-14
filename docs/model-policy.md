@@ -1,5 +1,9 @@
 # Model and Data Policy
 
+> Optional local/extended material. For the current 45-minute event, follow
+> the [browser task guide](../course/browser/README.md) and
+> [supplied agenda](../presentation/workshop-agenda.pdf).
+
 - Gemini is an optional planner and tutor, not a proof authority.
 - Lean Copilot is the default local assistant.
 - Additional local or cloud models may be compared under the same kernel gate.

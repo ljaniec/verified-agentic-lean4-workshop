@@ -1,5 +1,9 @@
 # Coding-Agent Entrypoints
 
+> Optional local/extended material. For the current 45-minute event, follow
+> the [browser task guide](../course/browser/README.md) and
+> [supplied agenda](../presentation/workshop-agenda.pdf).
+
 The repository keeps one canonical contract: `AGENTS.md`.
 
 Thin compatibility entrypoints exist so common tools converge on that same

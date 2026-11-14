@@ -1,5 +1,20 @@
 # Troubleshooting
 
+## Browser workshop
+
+Use the [browser task guide](../course/browser/README.md). Paste the entire
+self-contained file, replacing the previous task. Tasks 01–04 intentionally
+start with an unsolved goal; Task 05 intentionally rejects `rfl`. Read All
+Messages and wait for checking to finish. Never replace an error with a proof
+bypass. If the browser service is unavailable, use the prepared
+[local fallback](offline-mode.md).
+
+`./workshop task status` on `main` reports that it is not a checkpoint branch.
+That is expected: the browser route uses `./workshop browser check`; the
+optional local branch course starts with `./workshop task begin`.
+
+The remaining sections concern the optional full local project.
+
 For exercise-specific failures, also see
 [`participant-debugging.md`](participant-debugging.md).
 

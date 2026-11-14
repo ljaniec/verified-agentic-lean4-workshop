@@ -5,6 +5,7 @@ require_command lake
 cd "$REPOSITORY_ROOT"
 
 bash "$REPOSITORY_ROOT/scripts/check_forbidden_constructs.sh"
+python3 "$REPOSITORY_ROOT/scripts/browser_workshop.py" check
 lake build
 
 # `playground/` is now a runtime workspace. If a facilitator intentionally

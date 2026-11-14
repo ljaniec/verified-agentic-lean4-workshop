@@ -50,6 +50,17 @@ def Safe (state : State) : Prop :=
       state.logOpen = false ∧
       state.actuatorEnabled = false)
 
+instance (state : State) : Decidable (Safe state) :=
+  inferInstanceAs (Decidable ((state.mode = .active →
+    state.sensorOpen = true ∧ state.logOpen = true) ∧
+  (state.sensorOpen = true → state.mode = .active) ∧
+  (state.logOpen = true → state.mode = .active) ∧
+  (state.actuatorEnabled = true → state.mode = .active) ∧
+  ((state.mode = .unconfigured ∨ state.mode = .finalized) →
+    state.sensorOpen = false ∧
+      state.logOpen = false ∧
+      state.actuatorEnabled = false)))
+
 /-- Initial state of a freshly created managed node. -/
 def initial : State :=
   ⟨.unconfigured, false, false, false⟩

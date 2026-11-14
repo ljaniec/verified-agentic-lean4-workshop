@@ -2,171 +2,119 @@
 
 **Trustworthy AI-assisted robotics development with Gemini and Lean 4**
 
-This repository is the participant-facing working version of a 90-minute
-hands-on workshop on AI-assisted formal verification for robotics software.
-Language models may propose, explain, falsify, and repair. Lean 4 is the
-independent verification authority.
-
-The live workshop, repository content, code, and participant-facing technical
-material are all in English.
-
-## Core principle
+This repository contains a **45-minute, self-running workshop** on trustworthy
+AI-assisted development for robotics software. The participant may work
+manually, use Codex/Claude Code/Gemini, or connect a small local model. The
+verification boundary is the same in every case:
 
 ```text
-model proposal != proof
-
-proposal -> executable check -> Lean compilation -> verified or rejected
+AI proposal -> executable check -> Lean -> verified or rejected
 ```
 
-## Start here
+## Fastest start
 
-Before the event:
+The expensive setup is intended to happen **before** the workshop:
 
 ```bash
-./workshop setup
-./workshop check
+./workshop prepare
 ```
 
-Then follow the numbered participant curriculum:
-
-**[`curriculum/README.md`](curriculum/README.md)**
-
-The curriculum contains one folder per stage and one subfolder per concrete
-task or demo step, with exact commands, expected observations, non-spoiling
-hints, completion criteria, and recovery guidance.
-
-If you fall behind, use [`curriculum/CATCH_UP.md`](curriculum/CATCH_UP.md). If a
-command fails unexpectedly, start with
-[`docs/participant-debugging.md`](docs/participant-debugging.md).
-
-## Workshop path
-
-The 90-minute version contains two participant exercises and three short guided
-segments:
-
-1. ROS 2-style lifecycle + sensor + log + actuator resources;
-2. Behavior Tree to handwritten FSM refinement;
-3. VDA 5050-inspired temporal-conformance demo;
-4. perception-planner contract under uncertainty demo;
-5. Gemini-assisted proposal/rejection/repair demo, when the tested integration
-   is available, with a deterministic local fallback.
-
-Available starter scenarios are:
+At the event:
 
 ```bash
-./workshop scenario list
-./workshop scenario start lifecycle
-./workshop scenario start bt
-./workshop scenario start vda
-./workshop scenario start uncertainty
+git switch workshop/00-build
+./workshop task start
 ```
 
-The active files are:
+Then follow the command printed by the task runner. Each checkpoint branch
+contains one short `WORKSHOP_TASK.md`.
+
+The complete 45-minute route is documented in
+[`course/45min/README.md`](course/45min/README.md).
+
+## Agent users
+
+### Codex and AGENTS.md-aware tools
+
+Open the repository on the current task branch and ask:
 
 ```text
-playground/current/Current.lean
-playground/current/current.py
+Follow AGENTS.md and complete the current workshop task.
 ```
 
-Check exactly that pair with:
+### Claude Code
+
+`CLAUDE.md` redirects Claude Code to the same canonical `AGENTS.md` contract,
+so the task semantics stay identical.
+
+### Gemini / Antigravity
+
+`GEMINI.md` uses the same trust boundary. The Google ADK integration remains
+optional; the core course does not depend on cloud access.
+
+### Local laptop model
+
+A lightweight `llama.cpp` recipe is provided:
 
 ```bash
-./workshop scenario check
+./workshop local-agent profiles
+./workshop local-agent serve tiny
+# or, on a stronger laptop:
+./workshop local-agent serve standard
 ```
 
-Participant work is automatically backed up under `playground/backups/` before
-another starter replaces it. Optional trace-level stretch theorems are not
-predeclared in the baseline starters, so skipping them cannot block completion
-of the required scenario.
+See [`docs/local-agent-recipe.md`](docs/local-agent-recipe.md).
 
-## Reference solutions are intentionally absent
+## 45-minute route
 
-The participant branch contains no completed Lean proofs or Python reference
-implementations and provides no `scenario solution` command.
+| Time | Checkpoint | Goal |
+|---:|---|---|
+| 0–4 min | `00-build` | environment + trust boundary |
+| 4–12 min | `01-lifecycle` | resource invariant |
+| 12–23 min | `02-bt-refinement` | BT → FSM behavioral refinement |
+| 23–29 min | `03-vda-trace` | temporal trace conformance |
+| 29–35 min | `04-uncertainty` | set-valued planner contract |
+| 35–42 min | `05-agent-loop` | bad candidate → Lean rejection → repair |
+| 42–45 min | wrap-up | what was and was not verified |
 
-Reference answers are maintained separately for facilitator preparation and
-post-workshop study. A separate Git branch prevents accidental spoilers but is
-not access control: if this repository is made public before the event, the
-reference branch should remain unpublished/private until the workshop ends.
+Every task has a matching `-solution` branch. The next task branch is based on
+the previous solution branch, so falling behind does not block the rest of the
+course.
 
-## Lean Copilot
-
-The project pins Lean 4.28, Mathlib 4.28, and Lean Copilot 4.28. In an exercise,
-participants may try commands such as:
-
-```lean
-suggest_tactics
-search_proof
-select_premises
-```
-
-A generated suggestion is still only a candidate until the exact file compiles.
-
-## Optional Google agent layer
-
-The repository contains a constrained Google ADK/Gemini prototype for the final
-agentic-verification demonstration. It is optional and remains separate from
-the Lean-only participant path while integration is being finalized.
-
-The intended boundary is:
-
-```text
-Gemini proposal
-    -> constrained tool call
-    -> Lean checker
-    -> verifier feedback
-    -> repair
-```
-
-The agent receives no arbitrary shell tool. It may inspect the active
-participant Lean file and the shared workshop scenario models, and it must not
-report a proof as verified unless the actual Lean checker succeeds.
-
-For the current API-key prototype, copy `.env.example` to `.env` and set both
-`GOOGLE_API_KEY` and `GOOGLE_MODEL` before starting the agent. The model name is
-intentionally not hard-coded: the exact event model must be selected and tested
-end to end before the workshop configuration is frozen.
-
-## Lean-only setup
+## Core commands
 
 ```bash
-./workshop setup --lean-only
-./workshop check --lean-only
+./workshop quickcheck
+./workshop task status
+./workshop task start
+./workshop task check
+./workshop task next
+./workshop task solution
 ```
 
-For a fast environment test without downloading Lean Copilot model weights:
+`task solution` only prints the solution branch by default. Passing
+`--checkout` explicitly backs up the active playground and switches to it.
 
-```bash
-./workshop setup --lean-only --skip-models
-```
+## Formal-verification claim boundary
 
-## Local acceptance gate
+A successful Lean proof establishes a theorem **about the formal model and
+assumptions in this repository**. It does not automatically prove that the
+physical robot, ROS 2 runtime, network, perception system, or environment has
+been modeled completely.
 
-GitHub Actions are intentionally disabled. Repository validation is local:
+The workshop therefore keeps three questions separate:
 
-```bash
-./workshop check
-```
+1. Is the formal claim true of the model?
+2. Does the model capture the relevant part of the real system?
+3. Did we formalize the right requirement?
 
-This checks the no-Actions policy, Bash syntax, forbidden Lean constructs, the
-Lean build and committed playground, Ruff, mypy, and pytest.
+Lean is the authority for the first question. The second and third remain
+specification and engineering work.
 
-## Repository map
+## Extended material
 
-```text
-curriculum/                 numbered participant steps and demo runbooks
-VerifiedAgenticWorkshop/    shared checked Lean models
-exercises/                  unsolved Lean and Python templates
-playground/                 participant workspace and ignored backups
-agents/                     optional Google ADK agent prototype
-src/                        constrained verification-tool implementation
-tests/                      participant-branch regression tests
-docs/                       design, facilitator, and workshop material
-scripts/                    implementation behind ./workshop
-```
+The older detailed curriculum under `curriculum/` remains useful for a longer
+session and post-workshop study. The branch-based route under `course/45min/`
+is the authority for the 45-minute event.
 
-For workshop execution, start with the
-[participant curriculum](curriculum/README.md). Development notes remain in the
-[facilitator guide](docs/facilitator-guide.md),
-[rehearsal checklist](docs/facilitator-rehearsal.md), and
-[setup design](docs/setup-design.md).
+GitHub Actions remain disabled. Repository acceptance is local.

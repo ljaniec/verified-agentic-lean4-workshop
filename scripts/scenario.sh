@@ -44,6 +44,10 @@ scenario_files() {
       LEAN_STEM="04_PerceptionPlannerContract"
       PYTHON_STEM="04_perception_planner_contract"
       ;;
+    agent)
+      LEAN_STEM="05_AgentRepair"
+      PYTHON_STEM="05_agent_repair"
+      ;;
     *)
       fail "unknown scenario '$1'; run './workshop scenario list'"
       ;;
@@ -55,7 +59,7 @@ safe_metadata_value() {
   local value="$2"
 
   case "$kind:$value" in
-    scenario:lifecycle|scenario:bt|scenario:vda|scenario:uncertainty)
+    scenario:lifecycle|scenario:bt|scenario:vda|scenario:uncertainty|scenario:agent)
       printf '%s' "$value"
       ;;
     source:starter)

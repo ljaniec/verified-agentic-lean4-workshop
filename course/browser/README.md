@@ -1,8 +1,8 @@
 # Browser workshop — participant task guide
 
-Follow the [presentation](../../presentation/workshop-slides.pdf) and
-[agenda](../../presentation/workshop-agenda.pdf). This is the event path:
-45 minutes after the Lean introduction, with no installation during the session.
+After the Lean 4 introduction, follow the presenter through these six tasks.
+Keep the [presentation](../../presentation/workshop-slides.pdf) available for
+reference. No installation is needed during the session.
 
 ## One workflow for every task
 
@@ -26,7 +26,7 @@ Do not silence it with `sorry`, `admit`, invented assumptions, or an unchecked
 computation mechanism. If you fall behind, save your work and paste the next
 starter; it has no dependency on your earlier proof.
 
-## Task 00 — the verification gate · stop at 4:00
+## Task 00 — the verification gate
 
 **[Open starter](starters/00_VerificationGate.lean)**
 
@@ -37,7 +37,7 @@ is the only exercise that starts with a complete proof.
 Takeaway: a proposer supplies a candidate; the checker accepts or rejects the
 exact claim and proof. The remaining tasks keep their statements fixed.
 
-## Task 01 — lifecycle resources · stop at 12:00
+## Task 01 — lifecycle resources
 
 **[Open starter](starters/01_LifecycleResources.lean)**
 
@@ -72,7 +72,7 @@ This is a resource invariant for the model, not a proof of physical shutdown.
 
 </details>
 
-## Task 02 — Behavior Tree to FSM · stop at 23:00
+## Task 02 — Behavior Tree to FSM
 
 **[Open starter](starters/02_BehaviorTreeRefinement.lean)**
 
@@ -94,7 +94,7 @@ The proof establishes equality of simplified observable decisions.
 
 </details>
 
-## Task 03 — temporal traces · stop at 29:00
+## Task 03 — temporal traces
 
 **[Open starter](starters/03_TemporalTrace.lean)**
 
@@ -115,7 +115,7 @@ This teaching profile does not certify full VDA 5050 conformance.
 
 </details>
 
-## Task 04 — uncertainty contract · stop at 35:00
+## Task 04 — uncertainty contract
 
 **[Open starter](starters/04_Uncertainty.lean)**
 
@@ -140,7 +140,7 @@ the real obstacle lies in the supplied uncertainty interval. The task itself pro
 
 </details>
 
-## Task 05 — proposal, rejection, repair · stop at 42:00
+## Task 05 — proposal, rejection, repair
 
 **[Open starter](starters/05_AgentRepair.lean)**
 
@@ -170,7 +170,7 @@ proof bypasses. Return the candidate; only Lean can establish acceptance.
 
 </details>
 
-## Wrap-up · stop at 45:00
+## Wrap-up
 
 We proved explicit claims about explicit models. Engineers still have to
 justify the model, its assumptions, and the requirement. A formally checked

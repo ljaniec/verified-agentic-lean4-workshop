@@ -1,61 +1,34 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
-
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-
 usage() {
   cat <<'USAGE'
 Usage: ./workshop <command> [options]
 
-45-minute browser workshop (recommended):
-  browser list                           List the six self-contained Lean tasks.
-  browser show 01                         Print a task to paste into Lean Web.
-  browser check [FILE.lean]               Check the bundle or a local candidate.
+  browser list                 List the six current browser tasks.
+  browser show 01              Print a complete starter for Lean Web.
+  browser show 01 --completed  Print the scheduled slide checkpoint.
+  browser check [FILE.lean]    Check the bundle or a copied local candidate.
+  check [--lean-only]          Run local repository acceptance checks.
+  task check                  Compatibility alias for the slide's local gate.
+  help                        Show this message.
 
-Optional local course:
-  prepare [options]                      Do expensive setup before the event.
-  quickcheck                             Run the fast event preflight.
-  task <command> [options]               Run the branch-based workshop flow.
-  local-agent <command> [profile]        Run a small local llama.cpp model.
-
-Low-level utilities:
-  setup [--lean-only] [--skip-models]    Prepare the pinned environment.
-  doctor [--lean-only]                   Check prerequisites.
-  check [--lean-only]                    Run full local repository verification.
-  scenario <command> [name]              Load or check a scenario.
-  reset                                  Back up and clear active playground work.
-  agent                                  Start the optional Google ADK CLI tutor.
-  agent-web                              Start the optional Google ADK web tutor.
-  aristotle [prompt]                     Submit this Lean project to Aristotle.
-  help                                   Show this message.
-
-Recommended event flow:
-  Open https://live.lean-lang.org/ and follow course/browser/README.md.
-  No installation or branch switch is needed for browser participation.
+Event: open https://live.lean-lang.org/ and follow course/browser/README.md.
+Print presentation/speaker_notes.pdf. No installation during the workshop.
 USAGE
 }
-
 command_name="${1:-help}"
 if [[ $# -gt 0 ]]; then shift; fi
-
 case "$command_name" in
   browser) exec python3 "$ROOT/scripts/browser_workshop.py" "$@" ;;
-  prepare) exec bash "$ROOT/scripts/prepare.sh" "$@" ;;
-  quickcheck) exec bash "$ROOT/scripts/quickcheck.sh" "$@" ;;
-  task) exec bash "$ROOT/scripts/task.sh" "$@" ;;
-  local-agent) exec bash "$ROOT/scripts/local_agent.sh" "$@" ;;
-  setup) exec bash "$ROOT/scripts/setup.sh" "$@" ;;
-  doctor) exec bash "$ROOT/scripts/workshop_doctor.sh" "$@" ;;
   check) exec bash "$ROOT/scripts/verify.sh" "$@" ;;
-  scenario) exec bash "$ROOT/scripts/scenario.sh" "$@" ;;
-  reset) exec bash "$ROOT/scripts/reset_playground.sh" "$@" ;;
-  agent) exec bash "$ROOT/scripts/run_agent.sh" "$@" ;;
-  agent-web) exec bash "$ROOT/scripts/run_agent_web.sh" "$@" ;;
-  aristotle) exec bash "$ROOT/scripts/aristotle_submit.sh" "$@" ;;
-  help|-h|--help) usage ;;
-  *)
-    printf 'error: unknown command: %s\n\n' "$command_name" >&2
-    usage >&2
+  task)
+    if [[ "$#" -eq 1 && "$1" == check ]]; then
+      exec python3 "$ROOT/scripts/browser_workshop.py" check
+    fi
+    printf 'Use ./workshop browser; only task check remains as a slide-compatible alias.\n' >&2
     exit 2
     ;;
+  help|-h|--help) usage ;;
+  *) printf 'Unknown command: %s\n' "$command_name" >&2; usage >&2; exit 2 ;;
 esac

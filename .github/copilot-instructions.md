@@ -1,18 +1,6 @@
-# GitHub Copilot repository instructions
+# GitHub Copilot instructions
 
-The canonical instructions are in `AGENTS.md`.
-
-For the browser event, follow `course/browser/README.md`. A copied local snippet
-is checked with `./workshop browser check playground/current/Current.lean`.
-
-If `WORKSHOP_TASK.md` exists on a local checkpoint branch, read it and follow
-the branch-aware workflow:
-
-```bash
-./workshop task status
-./workshop task start
-./workshop task check
-```
-
-Do not use a solution branch unless explicitly requested. Never bypass Lean
-proof obligations.
+Follow `AGENTS.md` and the current `course/browser/README.md`.
+Edit only the final proof in a participant's copied snippet. Preserve the model
+and theorem statement; run `./workshop browser check playground/current/Current.lean`.
+Never bypass a proof obligation or claim success without the checker result.

@@ -1,15 +1,15 @@
 # Contributing
 
-The repository is private during workshop development. Every substantive
-change should be made on a branch and proposed through a draft pull request.
+This branch contains the current checked browser workshop. Earlier courses are
+retained in Git history, not in the participant file tree.
 
-## Development flow
+1. Make focused changes on a branch and prepare a draft pull request.
+2. Preserve the shared model and theorem statements.
+3. Run `./workshop browser check` after task/export changes.
+4. Run `./workshop check` for the full pinned Lean and Python acceptance checks.
+5. Check documentation links and visually inspect any changed PDF pages.
 
-1. Run `./workshop doctor` when preparing a new machine.
-2. Run `./workshop setup` on the first checkout.
-3. Make one focused change.
-4. Run `./workshop check` locally.
-5. Open a draft pull request with the local validation results.
-
-Use `--lean-only` for changes that do not touch the optional Google ADK/Python
-layer. GitHub Actions are intentionally disabled and must not be added.
+GitHub Actions are intentionally disabled. For development tools, run
+`uv sync --group dev --locked`. Browser participants need no local setup.
+The optional full library build uses the pinned Mathlib dependency; the browser
+bundle and its offline checker use only core Lean/Std.

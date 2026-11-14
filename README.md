@@ -5,7 +5,8 @@ the Lean introduction. Materials by Łukasz Janiec; presented by Mariusz Pawlus.
 
 **Start here:** [presentation PDF](presentation/workshop-slides.pdf) ·
 [agenda and presenter cue sheet](presentation/workshop-agenda.pdf) ·
-[browser tasks](course/browser/README.md)
+[browser tasks](course/browser/README.md) ·
+**[print speaker notes](presentation/speaker_notes.pdf)**
 
 The supplied presentation and agenda define this event's content and timing.
 The default route is **Lean in the browser**: no installation, Git checkout,
@@ -89,38 +90,24 @@ Other useful commands:
 ./workshop help
 ```
 
-## Optional: the larger local course
+## Current files only
 
-The [branch-based course](course/45min/README.md) and
-[extended curriculum](curriculum/README.md) include Python repairs, Mathlib,
-optional trace proofs, and model integrations. They are for prepared laptops
-or further study; they are not prerequisites for the browser workshop.
+This branch contains the current browser workshop, checked Lean models and tasks,
+current PDFs, and participant/presenter guidance. Superseded courses, unfinished
+legacy templates, old presentation drafts, and unused model integrations have
+been removed from `main`; Git history preserves them.
 
-```bash
-./workshop prepare       # before the event; downloads/builds project dependencies
-./workshop task begin    # fetches and starts the first checkpoint branch
-./workshop task check
-./workshop task next
-```
-
-`task` commands require a checkpoint branch; they are not the browser checker
-and do not run on `main`. Do not switch branches halfway through the browser
-route. Existing local exercise work is backed up under `playground/backups/`
-when the scenario loader replaces it.
-
-Coding-agent users should follow [AGENTS.md](AGENTS.md), which distinguishes
-browser exercises, local participant tasks, and repository maintenance.
-Claude Code and Gemini use the same contract through their entrypoint files.
-[Local models](docs/local-agent-recipe.md) and the Google ADK integration are
-optional proposer tools; neither is required for Task 05.
+Coding-agent users follow [AGENTS.md](AGENTS.md). The slide's
+`./workshop task check` remains a compatibility alias for the browser bundle gate.
+The current offline participant command is `./workshop browser check FILE.lean`.
 
 ## Maintainer checks
 
 ```bash
 ./workshop browser check          # fast event gate: core Lean + Python only
 ./workshop check --lean-only      # browser gate + full cached Lean project
-uv sync --extra agent --group dev --locked
-./workshop check                  # also Ruff, mypy, pytest; no cloud API call
+uv sync --group dev --locked
+./workshop check                  # also Ruff, mypy, pytest
 ```
 
 GitHub Actions are intentionally disabled. Acceptance is local. Generated

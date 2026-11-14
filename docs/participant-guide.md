@@ -1,19 +1,15 @@
 # Participant guide
 
-For the live event, open the **[browser task guide](../course/browser/README.md)**
-and **[Lean Web](https://live.lean-lang.org/)**. Paste each complete starter into
-the editor, change only the final proof, and wait for Lean to accept the entire
-file. You do not need to install Lean, Python, Git, or a model during the session.
+Open the **[browser task guide](../course/browser/README.md)** and
+**[Lean Web](https://live.lean-lang.org/)**. Paste each complete Raw starter,
+change only its final proof, and inspect All Messages after checking finishes.
+No installation, account, API key, or model is required.
 
-The [README](../README.md) contains the six-task timetable, local fallback, and
-trust rules. The [presentation](../presentation/workshop-slides.pdf) and
-[agenda](../presentation/workshop-agenda.pdf) define the 45-minute event.
+The [README](../README.md) gives the six-task timetable. The
+[presentation](../presentation/workshop-slides.pdf) and
+[agenda](../presentation/workshop-agenda.pdf) define the event.
 
-If you fall behind, save your current text and paste the next starter. The
-tasks are independent. Ask to see the completed checkpoint only when you want
-the answer or the presenter reaches the scheduled walkthrough.
-
-For the optional prepared local course, use
-[course/45min](../course/45min/README.md). For the longer Python/Lean exercises,
-use the [extended curriculum](../curriculum/README.md). Its additional tasks
-and 90-minute timing are not the live browser route.
+If you fall behind, save your text and paste the next self-contained starter.
+Use the completed checkpoint only when you request the answer or the presenter
+reaches the scheduled walkthrough. See [offline mode](offline-mode.md) if the
+browser service is unavailable.

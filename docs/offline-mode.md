@@ -35,6 +35,5 @@ Use an editor to show the theorem and diagnostic. The full bundle checker also
 replays the rejection and checks all six completed proofs. A live AI service is
 optional; a human can propose the same repair.
 
-For the extended local curriculum, cache its separate Mathlib/Copilot/Python
-dependencies with `./workshop prepare` in advance. That larger setup is not
-needed for the browser bundle's local fallback.
+The separate shared-model Mathlib library can be built with `lake build` when its
+dependencies are cached. It is not needed for this offline browser-task fallback.

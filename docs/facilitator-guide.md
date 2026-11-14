@@ -17,13 +17,13 @@ is the participant handout. No installation or model setup belongs in this slot.
 
 ## Before opening the room
 
-Follow the [rehearsal checklist](facilitator-rehearsal.md). Open the supplied
+Print the [current speaker notes](../presentation/speaker_notes.pdf), then follow
+the [rehearsal checklist](facilitator-rehearsal.md). Open the supplied
 slides, agenda, browser task guide, and [Lean Web](https://live.lean-lang.org/)
 in advance. Keep a local clone and the installed pinned Lean toolchain ready
 for an internet outage. `./workshop browser check` is the minimal event gate.
 
-The event PDF includes a repaired QR code on its setup slide. The supplied
-original is preserved separately. A [standalone QR](../presentation/assets/lean-web-qr.svg)
+The event PDF includes a repaired QR code on its setup slide. The supplied original remains in Git history. A [standalone QR](../presentation/assets/lean-web-qr.svg)
 is also available; see [presentation provenance](../presentation/README.md).
 
 ## Delivery cues

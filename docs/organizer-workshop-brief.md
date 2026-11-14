@@ -1,5 +1,9 @@
 # Workshop Discussion Brief
 
+> Optional local/extended material. For the current 45-minute event, follow
+> the [browser task guide](../course/browser/README.md) and
+> [supplied agenda](../presentation/workshop-agenda.pdf).
+
 ## From Hallucination to Proof: Trustworthy AI Agents with Gemini and Lean 4
 
 **Working document for discussion with event organizers and targeted Google-tooling support**

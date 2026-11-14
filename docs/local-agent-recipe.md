@@ -1,5 +1,9 @@
 # Local Agent Recipe
 
+> Optional local/extended material. For the current 45-minute event, follow
+> the [browser task guide](../course/browser/README.md) and
+> [supplied agenda](../presentation/workshop-agenda.pdf).
+
 The 45-minute workshop must not depend on a large GPU or on cloud access.
 
 The recommended local runtime is **llama.cpp** because it supports CPU

@@ -65,4 +65,4 @@ if [[ -n "$LOCAL_PROFILE" ]]; then
 fi
 
 log "Pre-event preparation completed"
-printf '\nAt the event run:\n  git switch workshop/00-build\n  ./workshop task start\n'
+printf '\nBrowser event: follow course/browser/README.md.\nOptional local checkpoint course: ./workshop task begin\n'

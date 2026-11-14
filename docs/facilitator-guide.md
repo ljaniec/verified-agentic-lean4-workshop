@@ -1,194 +1,67 @@
-# Facilitator Guide
+# Facilitator guide — the 45-minute event
 
-## Recommended 90-minute flow
+**Authority:** [supplied presentation](../presentation/workshop-slides.pdf) and
+[agenda / talk cues](../presentation/workshop-agenda.pdf). Start the timer after
+the Lean introduction. The [browser task guide](../course/browser/README.md)
+is the participant handout. No installation or model setup belongs in this slot.
 
-Use the numbered participant curriculum as the timing authority:
+| Stop at | Task | Maximum explanation |
+|---:|---|---|
+| 4:00 | 00 — browser checker and trust boundary | 45 seconds |
+| 12:00 | 01 — lifecycle resources | 60 seconds before work; 45 seconds for solution |
+| 23:00 | 02 — BT → FSM refinement | 75 seconds before work; 60 seconds for solution |
+| 29:00 | 03 — temporal trace conformance | 45 seconds total |
+| 35:00 | 04 — uncertainty contract | 45 seconds total |
+| 42:00 | 05 — proposal, rejection, repair | 60 seconds total |
+| 45:00 | Wrap-up | 3 minutes |
 
-| Time | Activity |
-|---:|---|
-| 0–10 min | Setup, fleet/BT motivation, and trust boundary |
-| 10–30 min | Lifecycle + sensor + log + actuator exercise |
-| 30–62 min | Behavior Tree to handwritten FSM refinement |
-| 62–69 min | VDA 5050-inspired temporal-conformance demo |
-| 69–76 min | Perception-planner uncertainty demo |
-| 76–87 min | Gemini/verification-loop demo or deterministic fallback |
-| 87–90 min | Wrap-up |
+## Before opening the room
 
-The participant sequence is under [`../curriculum/`](../curriculum/README.md).
-Every task is separately timeboxed and includes a recovery path. Rehearse the
-complete session with [`facilitator-rehearsal.md`](facilitator-rehearsal.md),
-not only with the completed answer files.
+Follow the [rehearsal checklist](facilitator-rehearsal.md). Open the supplied
+slides, agenda, browser task guide, and [Lean Web](https://live.lean-lang.org/)
+in advance. Keep a local clone and the installed pinned Lean toolchain ready
+for an internet outage. `./workshop browser check` is the minimal event gate.
 
-## Keep reference answers out of the participant checkout
+The event PDF includes a repaired QR code on its setup slide. The supplied
+original is preserved separately. A [standalone QR](../presentation/assets/lean-web-qr.svg)
+is also available; see [presentation provenance](../presentation/README.md).
 
-The participant branch intentionally has no completed answers and no
-`scenario solution` command.
+## Delivery cues
 
-Reference answers are stored on:
+- **00:** human and model are proposers; only the checker accepts the proof.
+- **01:** the mode changes, but open sensor/log handles violate the invariant.
+  The repaired step covers 192 modeled combinations, assuming a safe input.
+- **02:** cancellation has priority over path availability. The corrected FSM
+  agrees with the BT on all eight observations.
+- **03:** two individually well-formed `(7, 0)` orders form a stale-update trace.
+  Show `.error .orderUpdateNotIncreasing`; this is a teaching profile.
+- **04:** show the number line first: path `[0, 8]`, estimate `10`, interval
+  `[6, 10]`. The concrete decisions differ. Coverage of the real obstacle is
+  an external assumption.
+- **05:** paste the deliberately wrong `rfl` starter, show its actual diagnostic,
+  replace the final proof with `decide`, and show acceptance. A live assistant
+  is optional; use the deterministic sequence if it is slow or unavailable.
 
-```text
-workshop/reference-solutions
-```
+Open a [completed checkpoint](../course/browser/checkpoints/) only at the
+scheduled walkthrough. Each is self-contained, so no branch switch or earlier
+participant proof is required. Do not label a file accepted until the checker
+has finished without errors or warnings.
 
-For facilitator preparation, use a **separate checkout or worktree** rather than
-switching the branch in the participant working directory:
+## Recovery and hard stops
 
-```bash
-git fetch origin
-git worktree add ../verified-agentic-lean4-workshop-solutions \
-  workshop/reference-solutions
-```
+If two minutes behind, stop explaining implementation details. Show the result,
+state its scope, and move on. Cut tactic explanations first; then make Tasks 03
+and 04 presenter demos; then state Task 02's eight-case result without waiting
+for everyone. Save participant text before replacing it with the next task.
 
-Keep two terminals clearly labeled:
+If the browser fails, project the locally checked bundle with
+`./workshop browser check`; for a particular edited file, use
+`./workshop browser check playground/current/Current.lean`.
+Do not begin dependency/model downloads during the event.
 
-```text
-participant checkout  → agent/initial-workshop-platform
-facilitator checkout  → workshop/reference-solutions
-```
+## Close at minute 45
 
-This prevents an accidental branch switch from exposing answers on the
-projector or replacing participant work.
-
-### Important publication note
-
-A Git branch is not access control. While the repository is private, the
-reference branch can remain on GitHub. If the participant repository becomes
-public before the event and answers must remain hidden, keep the solutions on a
-private remote or publish them only after the session.
-
-## Pre-event acceptance
-
-On a participant-equivalent clean clone:
-
-```bash
-./workshop doctor
-./workshop setup
-./workshop check
-```
-
-Exercise the four starters:
-
-```bash
-for scenario in lifecycle bt vda uncertainty; do
-  ./workshop scenario start "$scenario"
-  ./workshop scenario status
-done
-```
-
-Then rehearse the two hands-on exercises from the numbered instructions as if
-you were a first-time participant. The required lifecycle path must reach a
-clean scenario check after Task 01.5; the required BT path must reach a clean
-scenario check after Task 02.4. The optional trace theorems are added only by
-participants who choose the stretch tasks and must not block the baseline.
-
-On the **reference-solutions worktree**, run:
-
-```bash
-./workshop check
-./workshop scenario verify-solutions
-
-for scenario in lifecycle bt vda uncertainty; do
-  ./workshop scenario solution "$scenario"
-  ./workshop scenario check
-done
-```
-
-Before release, confirm that the reference overlay is not behind the participant
-branch:
-
-```bash
-git rev-list --left-right --count \
-  agent/initial-workshop-platform...workshop/reference-solutions
-```
-
-The second number may be nonzero because it contains answer material. The first
-number must be zero.
-
-After the first successful reference-machine setup, review and commit the
-generated `lake-manifest.json` and `uv.lock`, then repeat acceptance from clean
-clones/worktrees.
-
-## Falling-behind policy
-
-Do not solve every unfinished proof for the room.
-
-The curriculum deliberately marks:
-
-- lifecycle trace induction as stretch;
-- BT trace lifting as stretch;
-- VDA, uncertainty, and Gemini sections as facilitator-led demos.
-
-When time expires, participants should let the scenario loader back up their
-current work and move with the room. Later demos do not depend on their local
-proof being complete. Point participants to
-[`../curriculum/CATCH_UP.md`](../curriculum/CATCH_UP.md) when necessary.
-
-Offer progressively stronger help:
-
-1. restate the goal in plain language;
-2. name the relevant definition;
-3. suggest the proof shape or tactic category;
-4. show a smaller analogous proof;
-5. only after the session, point to the reference-solutions branch.
-
-For tooling errors, use [`participant-debugging.md`](participant-debugging.md)
-before exposing an answer.
-
-## Demo policy
-
-### VDA demo
-
-Use the prepared reference checkout to show:
-
-- individually valid-looking messages forming an invalid temporal trace;
-- typed violation diagnostics;
-- the corresponding checked Lean claims.
-
-Keep the claim narrow: this is a VDA 5050-inspired teaching profile, not full
-standard certification.
-
-### Uncertainty demo
-
-Use the point-estimate counterexample first, then reveal the set-valued
-uncertainty contract and its universal Lean theorem.
-
-### Gemini demo
-
-Use the live Gemini/agent path only after end-to-end testing on the exact event
-environment. The event configuration must explicitly name the tested Gemini
-model; the repository deliberately has no stale hard-coded default.
-
-Prepare a deterministic fallback consisting of:
-
-1. one known-invalid Lean candidate;
-2. the corresponding real Lean diagnostic;
-3. one repaired candidate;
-4. a successful local checker result.
-
-The audience must see the same trust separation even if cloud access fails.
-The Gemini tutor may inspect the active participant file and shared scenario
-models, but it receives no arbitrary shell tool and cannot declare itself
-verified.
-
-## Event infrastructure
-
-- Prefer pairs or groups of two/three for the exercises.
-- Keep Lean, Lean Copilot, and Python participant-local.
-- Do not require Gemini credentials for the two core exercises.
-- Prepare repository, Mathlib cache, Lean Copilot cache, and Python artifacts
-  offline.
-- Keep any experimental local model optional and outside the critical path.
-- Never expose participant credentials or add them to repository files.
-- GitHub Actions remain disabled; validation is local.
-
-## Claim discipline
-
-- Lifecycle resources: simplified ROS 2-style application invariant, not a full
-  ROS 2 lifecycle semantics.
-- Behavior Tree: simplified single-decision Fallback model, not full
-  BehaviorTree.CPP semantics.
-- VDA 5050: teaching profile, not certification of the complete standard.
-- Uncertainty: one-dimensional interval contract, not a full perception or
-  motion-planning safety proof.
-- Gemini: proposal/repair layer; verification authority remains outside the
-  model.
+We verified properties of explicit models under explicit assumptions. Engineers
+still own model fidelity and the choice of requirement. AI proposes; Lean
+checks. A formally checked answer to the wrong question is still the wrong
+engineering result. Take new discussion topics after the practical sequence.

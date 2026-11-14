@@ -13,5 +13,9 @@ If `WORKSHOP_TASK.md` exists:
 
 Do not inspect a `-solution` branch unless explicitly requested.
 
+For the browser event, follow `course/browser/README.md`. A copied local snippet
+is checked with `./workshop browser check playground/current/Current.lean`.
+On `main`, follow the repository-maintenance scope in `AGENTS.md` when requested.
+
 Gemini may propose, explain, and repair. It is not the proof authority. A Lean
 claim is verified only when the local checker accepts the exact file.

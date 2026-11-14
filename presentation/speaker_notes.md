@@ -1,5 +1,10 @@
 # Speaker Script — Lean 4 and Software Verification
 
+> Earlier introduction draft. The current event uses the
+> [supplied presentation](workshop-slides.pdf) and
+> [agenda / task talk hints](workshop-agenda.pdf). This script does not follow
+> the supplied 18-slide deck; retain it only as optional background.
+
 This script follows the ten slides in `lean4_software_verification_15min.tex`.
 It is written to be spoken almost verbatim. Keep the examples at the level given
 here; the hands-on workshop will provide the details.

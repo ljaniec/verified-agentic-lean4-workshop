@@ -1,5 +1,9 @@
 # Optional Local Models
 
+> Optional local/extended material. For the current 45-minute event, follow
+> the [browser task guide](../course/browser/README.md) and
+> [supplied agenda](../presentation/workshop-agenda.pdf).
+
 Lean Copilot is the default local model integration because it already provides
 Lean-native tactic generation, proof search, and premise selection.
 

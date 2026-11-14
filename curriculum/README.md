@@ -1,6 +1,11 @@
-# Workshop Roadmap
+# Extended Curriculum — Optional 90-Minute Route
 
-This directory is the participant-facing path through the 90-minute workshop.
+**For the current event, use the [45-minute browser tasks](../course/browser/README.md)
+and [supplied agenda](../presentation/workshop-agenda.pdf).** This directory
+preserves the longer local course for further study; its setup and timing do
+not apply to the browser session.
+
+This directory is the participant-facing path through the extended 90-minute course.
 Work through the numbered folders in order. Every task folder contains only the
 information needed for that step: the objective, exact commands, expected
 observation, hints, completion criteria, and a recovery path.

@@ -6,7 +6,6 @@ import pytest
 
 from verified_agentic_workshop.tools import lean
 
-
 _ALLOWED_PREFIXES = (
     "playground/",
     "VerifiedAgenticWorkshop/Scenarios/",

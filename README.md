@@ -1,120 +1,142 @@
 # From Hallucination to Proof
 
-**Trustworthy AI-assisted robotics development with Gemini and Lean 4**
+**Trustworthy AI Agents with Lean 4** — a 45-minute practical workshop after
+the Lean introduction. Materials by Łukasz Janiec; presented by Mariusz Pawlus.
 
-This repository contains a **45-minute, self-running workshop** on trustworthy
-AI-assisted development for robotics software. The participant may work
-manually, use Codex/Claude Code/Gemini, or connect a small local model. The
-verification boundary is the same in every case:
+**Start here:** [presentation PDF](presentation/workshop-slides.pdf) ·
+[agenda and presenter cue sheet](presentation/workshop-agenda.pdf) ·
+[browser tasks](course/browser/README.md)
 
-```text
-AI proposal -> executable check -> Lean -> verified or rejected
-```
+The supplied presentation and agenda define this event's content and timing.
+The default route is **Lean in the browser**: no installation, Git checkout,
+Python environment, API key, or local model is needed during the session.
 
-## Fastest start
+## Join the workshop in two minutes
 
-The expensive setup is intended to happen **before** the workshop:
+1. Open **[live.lean-lang.org](https://live.lean-lang.org/)**.
+2. Open [Task 00](course/browser/starters/00_VerificationGate.lean).
+   On GitHub, use **Raw**, then copy the **entire file** into the Lean editor,
+   replacing its previous contents. Do not copy Markdown fences.
+3. Wait for Lean to finish. Task 00 should have no errors or warnings.
+4. Follow the [task guide](course/browser/README.md). For each new task, replace
+   the editor contents with that task's entire file and edit only the final
+   proof after `:= by`.
 
-```bash
-./workshop prepare
-```
+Tasks 01–04 contain `skip`, which deliberately leaves an **unsolved goal**.
+Task 05 contains an intentionally wrong `rfl` proof. These are starting points,
+not verified proofs. A task is complete only when Lean accepts the entire file
+without errors, warnings, or proof bypasses. Save your text before moving on.
 
-At the event:
+Any human or AI assistant may propose a proof. **The Lean checker decides
+whether the exact candidate proves the unchanged theorem.** Never use `sorry`,
+`admit`, invented assumptions, `native_decide`, or other proof bypasses.
 
-```bash
-git switch workshop/00-build
-./workshop task start
-```
+## The 45-minute route
 
-Then follow the command printed by the task runner. Each checkpoint branch
-contains one short `WORKSHOP_TASK.md`.
+| Minutes | Task | Paste-ready starter | Claim or observation |
+|---:|---|---|---|
+| 0–4 | 00 — Verification gate | [Lean](course/browser/starters/00_VerificationGate.lean) | proposer versus checker |
+| 4–12 | 01 — Lifecycle resources | [Lean](course/browser/starters/01_LifecycleResources.lean) | repaired step preserves the resource invariant |
+| 12–23 | 02 — BT → FSM refinement | [Lean](course/browser/starters/02_BehaviorTreeRefinement.lean) | same decision for all eight observations |
+| 23–29 | 03 — Temporal traces | [Lean](course/browser/starters/03_TemporalTrace.lean) | exact stale-update diagnostic |
+| 29–35 | 04 — Uncertainty contract | [Lean](course/browser/starters/04_Uncertainty.lean) | point estimate accepts; overlapping interval falls back |
+| 35–42 | 05 — Propose, reject, repair | [Lean](course/browser/starters/05_AgentRepair.lean) | `rfl` fails; repair from the real diagnostic |
+| 42–45 | Wrap-up | — | model fidelity, assumptions, and the right requirement |
 
-The complete 45-minute route is documented in
-[`course/45min/README.md`](course/45min/README.md).
+Every task is self-contained. You can move on with the room even if a previous
+proof is unfinished. Tasks 03 and 04 can be presenter demonstrations when time
+is tight. [Completed slide checkpoints](course/browser/checkpoints/) are for
+the scheduled walkthrough or an explicit request for the answer.
 
-## Agent users
+## Presenter: rehearse before the room arrives
 
-### Codex and AGENTS.md-aware tools
+Use the [facilitator guide](docs/facilitator-guide.md) and the
+[rehearsal checklist](docs/facilitator-rehearsal.md). Keep the PDFs and a local
+copy of the task files available. The browser service requires a working
+connection; prepare the local fallback on your own laptop in advance.
 
-Open the repository on the current task branch and ask:
-
-```text
-Follow AGENTS.md and complete the current workshop task.
-```
-
-### Claude Code
-
-`CLAUDE.md` redirects Claude Code to the same canonical `AGENTS.md` contract,
-so the task semantics stay identical.
-
-### Gemini / Antigravity
-
-`GEMINI.md` uses the same trust boundary. The Google ADK integration remains
-optional; the core course does not depend on cloud access.
-
-### Local laptop model
-
-A lightweight `llama.cpp` recipe is provided:
-
-```bash
-./workshop local-agent profiles
-./workshop local-agent serve tiny
-# or, on a stronger laptop:
-./workshop local-agent serve standard
-```
-
-See [`docs/local-agent-recipe.md`](docs/local-agent-recipe.md).
-
-## 45-minute route
-
-| Time | Checkpoint | Goal |
-|---:|---|---|
-| 0–4 min | `00-build` | environment + trust boundary |
-| 4–12 min | `01-lifecycle` | resource invariant |
-| 12–23 min | `02-bt-refinement` | BT → FSM behavioral refinement |
-| 23–29 min | `03-vda-trace` | temporal trace conformance |
-| 29–35 min | `04-uncertainty` | set-valued planner contract |
-| 35–42 min | `05-agent-loop` | bad candidate → Lean rejection → repair |
-| 42–45 min | wrap-up | what was and was not verified |
-
-Every task has a matching `-solution` branch. The next task branch is based on
-the previous solution branch, so falling behind does not block the rest of the
-course.
-
-## Core commands
+With Lean installed through `elan` and Python 3.11 or newer:
 
 ```bash
-./workshop quickcheck
-./workshop task status
-./workshop task start
+git clone https://github.com/ljaniec/verified-agentic-lean4-workshop.git
+cd verified-agentic-lean4-workshop
+./workshop browser check
+```
+
+This checks all six completed files with the pinned **Lean 4.28.0**, rejects the
+five unfinished/wrong starters, and checks that the exported definitions still
+match the shared models. Success ends with `BROWSER_WORKSHOP_OK`.
+**No Lake/Mathlib download or cloud credentials are needed for this check.**
+The pinned Lean toolchain itself must already be installed for offline use.
+The hosted editor may use a different Lean version: its own checker result is
+required for the text you paste there.
+
+For a local exercise, copy a starter into the ignored runtime workspace:
+
+```bash
+mkdir -p playground/current
+cp course/browser/starters/01_LifecycleResources.lean playground/current/Current.lean
+# Edit only the final proof, then:
+./workshop browser check playground/current/Current.lean
+```
+
+Other useful commands:
+
+```bash
+./workshop browser list
+./workshop browser show 01
+./workshop browser show 01 --completed  # scheduled solution walkthrough
+./workshop help
+```
+
+## Optional: the larger local course
+
+The [branch-based course](course/45min/README.md) and
+[extended curriculum](curriculum/README.md) include Python repairs, Mathlib,
+optional trace proofs, and model integrations. They are for prepared laptops
+or further study; they are not prerequisites for the browser workshop.
+
+```bash
+./workshop prepare       # before the event; downloads/builds project dependencies
+./workshop task begin    # fetches and starts the first checkpoint branch
 ./workshop task check
 ./workshop task next
-./workshop task solution
 ```
 
-`task solution` only prints the solution branch by default. Passing
-`--checkout` explicitly backs up the active playground and switches to it.
+`task` commands require a checkpoint branch; they are not the browser checker
+and do not run on `main`. Do not switch branches halfway through the browser
+route. Existing local exercise work is backed up under `playground/backups/`
+when the scenario loader replaces it.
 
-## Formal-verification claim boundary
+Coding-agent users should follow [AGENTS.md](AGENTS.md), which distinguishes
+browser exercises, local participant tasks, and repository maintenance.
+Claude Code and Gemini use the same contract through their entrypoint files.
+[Local models](docs/local-agent-recipe.md) and the Google ADK integration are
+optional proposer tools; neither is required for Task 05.
 
-A successful Lean proof establishes a theorem **about the formal model and
-assumptions in this repository**. It does not automatically prove that the
-physical robot, ROS 2 runtime, network, perception system, or environment has
-been modeled completely.
+## Maintainer checks
 
-The workshop therefore keeps three questions separate:
+```bash
+./workshop browser check          # fast event gate: core Lean + Python only
+./workshop check --lean-only      # browser gate + full cached Lean project
+uv sync --extra agent --group dev --locked
+./workshop check                  # also Ruff, mypy, pytest; no cloud API call
+```
 
-1. Is the formal claim true of the model?
-2. Does the model capture the relevant part of the real system?
-3. Did we formalize the right requirement?
+GitHub Actions are intentionally disabled. Acceptance is local. Generated
+runtime work, credentials, and model weights do not belong in Git.
 
-Lean is the authority for the first question. The second and third remain
-specification and engineering work.
+## What was proved?
 
-## Extended material
+A checked theorem establishes the stated property of the explicit model under
+its assumptions. Lifecycle preservation and BT refinement cover every modeled
+input. Tasks 03 and 04 prove the concrete examples displayed in the slides;
+they do not by themselves establish a universal protocol or planner theorem.
 
-The older detailed curriculum under `curriculum/` remains useful for a longer
-session and post-workshop study. The branch-based route under `course/45min/`
-is the authority for the 45-minute event.
+These examples do not certify a physical robot, the full ROS 2 runtime,
+arbitrary asynchronous Behavior Trees, or the complete VDA 5050 standard.
+The uncertainty guarantee is relative to a supplied interval; establishing
+that it contains the real obstacle is a separate engineering obligation.
 
-GitHub Actions remain disabled. Repository acceptance is local.
+A formally checked answer to the wrong question is still the wrong engineering
+result.

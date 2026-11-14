@@ -1,6 +1,5 @@
 from pathlib import Path
 
-
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 CURRICULUM = REPOSITORY_ROOT / "curriculum"
 
@@ -73,7 +72,7 @@ def test_participant_scenario_cli_does_not_reveal_answers() -> None:
 def test_numbered_curriculum_is_complete() -> None:
     assert CURRICULUM.is_dir()
     actual_stages = {path.name for path in CURRICULUM.iterdir() if path.is_dir()}
-    assert EXPECTED_STAGES <= actual_stages
+    assert actual_stages >= EXPECTED_STAGES
 
     missing_readmes = [
         task

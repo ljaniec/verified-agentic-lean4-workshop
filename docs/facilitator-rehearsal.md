@@ -1,163 +1,59 @@
-# Facilitator Rehearsal Checklist
+# Rehearsal checklist — browser workshop
 
-Use this checklist before the workshop is published and again on the instructor
-machine shortly before the event. The purpose is to validate the exact path a
-participant will see, not only the reference solutions.
+Use the supplied [agenda](../presentation/workshop-agenda.pdf) for all stops.
+Run these checks on the actual presenter laptop before the room arrives.
 
-## 1. Create separate participant and reference worktrees
+## Minimal event gate
 
 ```bash
-git fetch origin
-
-git worktree add ../verified-agentic-lean4-workshop-participant \
-  agent/initial-workshop-platform
-
-git worktree add ../verified-agentic-lean4-workshop-solutions \
-  workshop/reference-solutions
+lean --version
+./workshop browser check
 ```
 
-Never switch the projected participant checkout to the reference branch during
-the live session.
+Run from the repository root so `elan` selects `lean-toolchain` (4.28.0).
+Expected final line: `BROWSER_WORKSHOP_OK (6 checkpoints; 5 expected starter rejections)`.
+The checker prints Task 05's real Lean diagnostic. The completed file must pass;
+a timeout, missing import, or unrelated starter error is not a successful gate.
+No Mathlib, Lean Copilot, Python packages, or cloud credentials are needed.
 
-## 2. Validate the participant checkout
+## Rehearse what participants see
 
-From the participant worktree:
+1. Open [Lean Web](https://live.lean-lang.org/) and note the selected Lean version.
+2. Follow [Task 00](../course/browser/starters/00_VerificationGate.lean) from Raw
+   file to pasted text to an error-free checker result.
+3. Paste each Task 01–04 starter. Confirm it is intentionally unfinished.
+   Apply the corresponding proof from the slide checkpoint and wait for checking.
+4. Paste Task 05 with `rfl`, read its actual rejection, then change only `rfl` to
+   `decide`. Confirm the entire file is accepted.
+5. Keep the [completed files](../course/browser/checkpoints/) open for scheduled
+   walkthroughs; keep each task inside the agenda's timebox.
+
+A local success is evidence for the pinned local version, not a claim that the
+hosted service or event Wi-Fi was tested. Check those on the event connection.
+
+## Prepare recovery
+
+- Keep the PDFs, task files, and installed Lean toolchain on the presenter laptop.
+- Check the [offline workflow](offline-mode.md) with networking unavailable.
+- Keep the printed browser URL and [standalone QR](../presentation/assets/lean-web-qr.svg)
+  available. The event deck repairs the supplied original's QR placeholder.
+- If a model is unavailable, use Task 05's deterministic rejection/repair.
+- Save any active participant text before moving to another self-contained task.
+
+## Additional repository acceptance
+
+For maintainers with the full local project prepared:
 
 ```bash
-./workshop doctor
-./workshop setup
+./workshop check --lean-only
+uv sync --extra agent --group dev --locked
 ./workshop check
 ```
 
-Confirm that:
+The ADK import test uses a dummy model name and makes no API call. No credentials
+are required. Live cloud/model integration is optional and must be separately
+rehearsed before use. Local checks replace GitHub Actions for this repository.
 
-- no GitHub Actions workflow exists;
-- no reference solution directory exists;
-- `./workshop scenario solution` is unavailable;
-- all four starters can be loaded;
-- loading a new starter backs up existing participant work.
-
-## 3. Rehearse the lifecycle exercise as a beginner
-
-```bash
-./workshop scenario start lifecycle
-./workshop scenario status
-```
-
-Follow `curriculum/01-lifecycle-resources/` in order. Do not use the reference
-worktree until you have reproduced the participant experience.
-
-Important acceptance point: after Tasks 01.1–01.5 are completed, the ordinary
-`./workshop scenario check` must pass. The optional trace theorem in Task 01.6
-must not block participants who skip the stretch task.
-
-Record the elapsed time. The required path should fit within the allocated
-20-minute stage on a machine with dependencies already prepared.
-
-## 4. Rehearse the Behavior Tree exercise as a beginner
-
-```bash
-./workshop scenario start bt
-./workshop scenario status
-```
-
-Follow `curriculum/02-behavior-tree-refinement/` in order.
-
-Important acceptance point: after Tasks 02.1–02.4 are completed, the ordinary
-`./workshop scenario check` must pass. Task 02.5 is optional and must not leave
-an unresolved theorem in the baseline starter.
-
-Record the elapsed time and note any instruction that requires knowledge not
-introduced earlier in the workshop.
-
-## 5. Validate the reference checkout
-
-From the reference worktree:
-
-```bash
-./workshop check
-./workshop scenario verify-solutions
-
-for scenario in lifecycle bt vda uncertainty; do
-  ./workshop scenario solution "$scenario"
-  ./workshop scenario check
-done
-```
-
-The reference branch must be based on the current participant branch. Before
-release, verify:
-
-```bash
-git rev-list --left-right --count \
-  agent/initial-workshop-platform...workshop/reference-solutions
-```
-
-The reference branch may be ahead because it contains the answer overlay, but
-it must not be behind the participant branch.
-
-## 6. Rehearse both facilitator demos
-
-Use the reference worktree and follow:
-
-```text
-curriculum/03-vda5050-demo/
-curriculum/04-uncertainty-demo/
-```
-
-Check that every command, expected diagnostic, and claim boundary matches the
-actual implementation. Keep each demo under its timebox.
-
-## 7. Freeze the Gemini demonstration only after an end-to-end run
-
-Do not make the cloud path critical until the exact event configuration has
-been tested. Freeze and record:
-
-- Gemini model identifier;
-- authentication method;
-- ADK invocation command;
-- exposed tool schemas;
-- theorem used in the demo;
-- known-invalid candidate;
-- expected Lean rejection;
-- known-corrected candidate;
-- successful Lean result;
-- deterministic local fallback.
-
-The visible sequence must remain:
-
-```text
-Gemini candidate
-→ constrained tool call
-→ Lean rejection
-→ verifier feedback
-→ repaired candidate
-→ Lean verification
-```
-
-A model response must never be displayed as `verified` before the real checker
-returns success.
-
-## 8. Test degraded modes
-
-Rehearse at least these failures:
-
-1. no Gemini/API access;
-2. no Lean Copilot model weights;
-3. no network after dependencies have been cached;
-4. participant starts the next scenario with unfinished work;
-5. participant edits the scenario metadata files;
-6. an AI proposal contains a forbidden proof bypass.
-
-The core lifecycle and BT exercises must remain teachable without cloud access.
-
-## 9. Final release gate
-
-Immediately before publishing the participant project:
-
-```bash
-./workshop check
-```
-
-Then perform a fresh clone on a machine or directory that has never used the
-repository and repeat the participant setup. Do not use successful results from
-a warm development checkout as the final release evidence.
+The older branch-based and 90-minute courses are optional paths, not release
+prerequisites for browser participation. Do not mix their larger proof TODOs
+with the shorter slide tasks during the event.

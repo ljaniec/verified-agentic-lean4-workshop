@@ -7,6 +7,31 @@ model-backed assistant.
 The workshop is time-boxed. Prefer finishing the current verified checkpoint
 over exploring unrelated improvements.
 
+## Choose the requested workflow
+
+The live event follows `presentation/workshop-slides.pdf` and
+`presentation/workshop-agenda.pdf`. These take precedence over older course
+plans. The default participant route is `course/browser/README.md`: six
+self-contained snippets pasted into Lean Web, with no installation during the
+session. The branch-based course is an optional prepared local route.
+
+- **Browser exercise:** edit only the final proof in the participant's copied
+  snippet. Keep definitions and the theorem statement fixed. For a local copy,
+  use `playground/current/Current.lean` and run
+  `./workshop browser check playground/current/Current.lean` after each change.
+  Do not regenerate the bundle or edit its shared models for a participant.
+- **Local checkpoint:** when `WORKSHOP_TASK.md` exists, follow the mandatory
+  startup protocol below and its allowed files.
+- **Repository maintenance:** an explicit request to audit, organize, or update
+  the workshop is not a participant proof task. Work within that requested
+  scope, preserve exercise specifications, and run `./workshop browser check`
+  plus the relevant repository checks. Do not switch to a task branch simply
+  to perform maintenance on `main`.
+
+Browser checkpoints under `course/browser/checkpoints/` contain the slide
+walkthroughs. During a participant task, inspect them only on an explicit
+request for the answer or at the scheduled walkthrough.
+
 ## Mandatory startup protocol
 
 When `WORKSHOP_TASK.md` exists, do this immediately:
@@ -42,7 +67,8 @@ Do not modify the static guard to permit a candidate.
 
 ## Participant task policy
 
-Unless `WORKSHOP_TASK.md` explicitly says otherwise, agents may edit only:
+During a local participant task, unless `WORKSHOP_TASK.md` explicitly says
+otherwise, agents may edit only:
 
 ```text
 playground/current/Current.lean
